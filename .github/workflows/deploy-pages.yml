@@ -1,0 +1,51 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  BASE_HREF: ${{ vars.BASE_HREF || '/Chnorrlimorrli/' }}
+  SITE_NOINDEX: ${{ vars.SITE_NOINDEX || 'true' }}
+  OUTPUT: dist/chnorrlimorrli/browser
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -- --base-href "$BASE_HREF"
+      - name: SPA fallback for client-rendered routes
+        run: cp "$OUTPUT/index.csr.html" "$OUTPUT/404.html"
+      - name: Keep staging out of search engines
+        if: env.SITE_NOINDEX == 'true'
+        run: |
+          find "$OUTPUT" -name '*.html' -exec sed -i 's|<head>|<head><meta name="robots" content="noindex, nofollow">|' {} +
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.OUTPUT }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
