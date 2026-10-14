@@ -95,6 +95,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/order-success').then((m) => m.OrderSuccess),
     title: 'Bestellung – Chnorrlimorrli',
   },
+  {
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.routes').then((m) => m.adminRoutes),
+  },
   { path: 'products', redirectTo: 'shop' },
   { path: 'products/:legacyPath', redirectTo: 'shop' },
   {

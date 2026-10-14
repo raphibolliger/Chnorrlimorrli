@@ -1,0 +1,70 @@
+<section class="flex min-h-dvh items-center justify-center bg-mais px-4 py-10">
+  <div class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl sm:p-8">
+    <p class="text-sm font-semibold tracking-wide text-navy/60 uppercase">Chnorrlimorrli</p>
+    <h1 class="mt-1 text-3xl font-bold text-navy">Verwaltung</h1>
+
+    @if (step() === 'email') {
+      <form class="mt-6 space-y-4" (submit)="$event.preventDefault(); requestCode()">
+        <label class="block">
+          <span class="text-sm font-semibold">E-Mail-Adresse</span>
+          <input
+            type="email"
+            name="email"
+            autocomplete="email"
+            required
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event)"
+            class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-3 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+          />
+        </label>
+        <button
+          type="submit"
+          [disabled]="busy()"
+          class="w-full rounded-full bg-navy px-6 py-3 font-semibold text-white disabled:opacity-60"
+        >
+          {{ busy() ? 'Einen Moment …' : 'Code anfordern' }}
+        </button>
+      </form>
+    } @else {
+      <form class="mt-6 space-y-4" (submit)="$event.preventDefault(); verifyCode()">
+        <p class="text-sm leading-relaxed text-ink/80">
+          Falls <strong>{{ email() }}</strong> Zugang zur Verwaltung hat, haben wir dir einen
+          6-stelligen Code geschickt.
+        </p>
+        <label class="block">
+          <span class="text-sm font-semibold">Code</span>
+          <input
+            name="code"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            required
+            [ngModel]="code()"
+            (ngModelChange)="code.set($event)"
+            class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-3 text-center text-2xl font-semibold tracking-[0.5em] ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+          />
+        </label>
+        <button
+          type="submit"
+          [disabled]="busy() || code().length !== 6"
+          class="w-full rounded-full bg-navy px-6 py-3 font-semibold text-white disabled:opacity-60"
+        >
+          {{ busy() ? 'Einen Moment …' : 'Anmelden' }}
+        </button>
+        <button
+          type="button"
+          (click)="restart()"
+          class="w-full text-sm font-semibold text-navy underline"
+        >
+          Andere Adresse verwenden
+        </button>
+      </form>
+    }
+
+    @if (message()) {
+      <p class="mt-4 rounded-2xl bg-red-50 p-3 text-sm text-red-800" role="alert">
+        {{ message() }}
+      </p>
+    }
+  </div>
+</section>
