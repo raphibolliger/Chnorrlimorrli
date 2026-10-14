@@ -85,6 +85,16 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/cart-page').then((m) => m.CartPage),
     title: 'Warenkorb – Chnorrlimorrli',
   },
+  {
+    path: 'kasse',
+    loadComponent: () => import('./pages/checkout').then((m) => m.Checkout),
+    title: 'Kasse – Chnorrlimorrli',
+  },
+  {
+    path: 'bestellung/erfolg',
+    loadComponent: () => import('./pages/order-success').then((m) => m.OrderSuccess),
+    title: 'Bestellung – Chnorrlimorrli',
+  },
   { path: 'products', redirectTo: 'shop' },
   { path: 'products/:legacyPath', redirectTo: 'shop' },
   {

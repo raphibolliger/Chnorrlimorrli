@@ -1,0 +1,300 @@
+<section class="bg-cream">
+  <div class="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+    <a
+      routerLink="/warenkorb"
+      class="inline-flex items-center gap-2 text-sm font-semibold text-navy hover:underline"
+      ><span aria-hidden="true">←</span> Zurück zum Warenkorb</a
+    >
+    <h1 class="mt-3 text-3xl font-bold text-navy sm:text-4xl">Kasse</h1>
+
+    @if (abgebrochen()) {
+      <p class="mt-4 rounded-2xl bg-mais-100 p-4" role="status">
+        Die Zahlung wurde abgebrochen. Dein Warenkorb ist noch da, du kannst es gleich nochmals
+        versuchen.
+      </p>
+    }
+
+    @if (cart.items().length === 0) {
+      <div class="mt-6 rounded-3xl bg-white p-8 text-center shadow-sm">
+        <p class="text-lg">Dein Warenkorb ist leer.</p>
+        <a
+          routerLink="/shop"
+          class="mt-4 inline-block rounded-full bg-navy px-6 py-3 font-semibold text-white"
+          >Zum Shop</a
+        >
+      </div>
+    } @else {
+      <form
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+        novalidate
+        class="mt-6 grid items-start gap-6 lg:grid-cols-[1fr_minmax(0,380px)]"
+      >
+        <div class="space-y-6">
+          <fieldset class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
+            <legend class="sr-only">Kontakt</legend>
+            <h2 class="text-xl font-semibold text-navy">Kontakt</h2>
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+              <label class="block sm:col-span-2">
+                <span class="text-sm font-semibold">E-Mail</span>
+                <input
+                  type="email"
+                  formControlName="email"
+                  autocomplete="email"
+                  class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-3 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+                  [class.ring-red-500]="showError('email')"
+                />
+                @if (showError('email')) {
+                  <span class="mt-1 block text-sm text-red-700"
+                    >Bitte gib eine gültige E-Mail-Adresse an.</span
+                  >
+                }
+              </label>
+              <label class="block">
+                <span class="text-sm font-semibold">Vorname</span>
+                <input
+                  formControlName="firstName"
+                  autocomplete="given-name"
+                  class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-3 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+                  [class.ring-red-500]="showError('firstName')"
+                />
+                @if (showError('firstName')) {
+                  <span class="mt-1 block text-sm text-red-700">Bitte gib deinen Vornamen an.</span>
+                }
+              </label>
+              <label class="block">
+                <span class="text-sm font-semibold">Nachname</span>
+                <input
+                  formControlName="lastName"
+                  autocomplete="family-name"
+                  class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-3 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+                  [class.ring-red-500]="showError('lastName')"
+                />
+                @if (showError('lastName')) {
+                  <span class="mt-1 block text-sm text-red-700"
+                    >Bitte gib deinen Nachnamen an.</span
+                  >
+                }
+              </label>
+              <label class="block sm:col-span-2">
+                <span class="text-sm font-semibold"
+                  >Telefon <span class="font-normal text-ink/60">(freiwillig)</span></span
+                >
+                <input
+                  type="tel"
+                  formControlName="phone"
+                  autocomplete="tel"
+                  class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-3 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+                />
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
+            <legend class="sr-only">Versandart</legend>
+            <h2 class="text-xl font-semibold text-navy">Versandart</h2>
+            @if (loadFailed()) {
+              <p class="mt-4 text-red-700">
+                Die Versandarten konnten nicht geladen werden. Bitte lade die Seite neu.
+              </p>
+            } @else if (methods().length === 0) {
+              <div class="mt-4 space-y-3" aria-hidden="true">
+                <div class="h-16 animate-pulse rounded-2xl bg-cream"></div>
+                <div class="h-16 animate-pulse rounded-2xl bg-cream"></div>
+              </div>
+            } @else {
+              <div class="mt-4 space-y-3">
+                @for (method of methods(); track method.id) {
+                  <label
+                    class="flex cursor-pointer items-start gap-3 rounded-2xl p-4 ring-1 transition"
+                    [class]="
+                      form.controls.shippingMethodId.value === method.id
+                        ? 'bg-mais-50 ring-2 ring-navy'
+                        : 'bg-cream ring-ink/10 hover:ring-navy/40'
+                    "
+                  >
+                    <input
+                      type="radio"
+                      formControlName="shippingMethodId"
+                      [value]="method.id"
+                      class="mt-1 accent-navy"
+                    />
+                    <span class="min-w-0 flex-1">
+                      <span class="flex flex-wrap items-baseline justify-between gap-2">
+                        <span class="font-semibold">{{ method.name }}</span>
+                        <span class="font-semibold">{{
+                          shippingPriceOf(method) === 0
+                            ? 'kostenlos'
+                            : (shippingPriceOf(method) | chf)
+                        }}</span>
+                      </span>
+                      @if (method.description) {
+                        <span class="mt-1 block text-sm text-ink/70">{{ method.description }}</span>
+                      }
+                      @if (method.kind === 'local_delivery') {
+                        <span class="mt-1 block text-sm text-ink/70"
+                          >Nur für Postleitzahlen im Freiamt und Umgebung.</span
+                        >
+                      }
+                    </span>
+                  </label>
+                }
+              </div>
+            }
+          </fieldset>
+
+          @if (needsAddress()) {
+            <fieldset class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
+              <legend class="sr-only">Lieferadresse</legend>
+              <h2 class="text-xl font-semibold text-navy">Lieferadresse</h2>
+              <p class="mt-1 text-sm text-ink/60">Wir liefern nur in die Schweiz.</p>
+              <div class="mt-4 grid gap-4 sm:grid-cols-[minmax(0,140px)_1fr]">
+                <label class="block sm:col-span-2">
+                  <span class="text-sm font-semibold">Strasse und Hausnummer</span>
+                  <input
+                    formControlName="street"
+                    autocomplete="street-address"
+                    class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-3 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+                    [class.ring-red-500]="addressMissing('street')"
+                  />
+                  @if (addressMissing('street')) {
+                    <span class="mt-1 block text-sm text-red-700"
+                      >Bitte gib Strasse und Hausnummer an.</span
+                    >
+                  }
+                </label>
+                <label class="block">
+                  <span class="text-sm font-semibold">PLZ</span>
+                  <input
+                    formControlName="postalCode"
+                    inputmode="numeric"
+                    autocomplete="postal-code"
+                    maxlength="4"
+                    class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-3 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+                    [class.ring-red-500]="addressMissing('postalCode') || localDeliveryBlocked()"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-sm font-semibold">Ort</span>
+                  <input
+                    formControlName="city"
+                    autocomplete="address-level2"
+                    class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-3 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+                    [class.ring-red-500]="addressMissing('city')"
+                  />
+                </label>
+                @if (addressMissing('postalCode')) {
+                  <span class="block text-sm text-red-700 sm:col-span-2"
+                    >Bitte gib eine gültige Schweizer Postleitzahl an.</span
+                  >
+                }
+                @if (addressMissing('city')) {
+                  <span class="block text-sm text-red-700 sm:col-span-2"
+                    >Bitte gib den Ort an.</span
+                  >
+                }
+                @if (localDeliveryBlocked()) {
+                  <span class="block rounded-xl bg-red-50 p-3 text-sm text-red-800 sm:col-span-2">
+                    Die Lieferung im Freiamt ist für diese Postleitzahl nicht möglich. Bitte wähle
+                    Postversand oder Abholung.
+                  </span>
+                }
+              </div>
+            </fieldset>
+          }
+
+          <fieldset class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
+            <legend class="sr-only">Bemerkung</legend>
+            <label class="block">
+              <span class="text-xl font-semibold text-navy"
+                >Bemerkung <span class="text-base font-normal text-ink/60">(freiwillig)</span></span
+              >
+              <textarea
+                formControlName="note"
+                rows="3"
+                maxlength="1000"
+                class="mt-3 w-full rounded-xl border-0 bg-cream px-4 py-3 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+                placeholder="Zum Beispiel eine Widmung oder einen Wunschtermin für die Abholung"
+              ></textarea>
+            </label>
+          </fieldset>
+        </div>
+
+        <aside
+          class="space-y-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6 lg:sticky lg:top-24"
+        >
+          <h2 class="text-xl font-semibold text-navy">Deine Bestellung</h2>
+          <ul class="divide-y divide-ink/10">
+            @for (item of cart.items(); track $index) {
+              <li class="flex justify-between gap-3 py-3 text-sm">
+                <span class="min-w-0">
+                  <span class="font-semibold">{{ item.quantity }} × {{ item.name }}</span>
+                  @for (option of item.options | keyvalue; track option.key) {
+                    <span class="block text-ink/60">{{ option.key }}: {{ option.value }}</span>
+                  }
+                </span>
+                <span class="shrink-0">{{ item.unitPriceRappen * item.quantity | chf }}</span>
+              </li>
+            }
+          </ul>
+          <dl class="space-y-1 border-t border-ink/10 pt-3 text-sm">
+            <div class="flex justify-between">
+              <dt>Zwischensumme</dt>
+              <dd>{{ cart.subtotalRappen() | chf }}</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt>{{ selectedMethod()?.name ?? 'Versand' }}</dt>
+              <dd>{{ shippingRappen() === 0 ? 'kostenlos' : (shippingRappen() | chf) }}</dd>
+            </div>
+            <div class="flex justify-between border-t border-ink/10 pt-2 text-lg font-bold">
+              <dt>Total</dt>
+              <dd>{{ totalRappen() | chf }}</dd>
+            </div>
+          </dl>
+
+          <label class="flex items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              formControlName="termsAccepted"
+              class="mt-0.5 size-5 accent-navy"
+            />
+            <span>
+              Ich akzeptiere die
+              <a routerLink="/agb" target="_blank" class="font-semibold text-navy underline">AGB</a>
+              und habe die
+              <a routerLink="/datenschutz" target="_blank" class="font-semibold text-navy underline"
+                >Datenschutzerklärung</a
+              >
+              gelesen.
+            </span>
+          </label>
+          @if (showError('termsAccepted')) {
+            <p class="text-sm text-red-700">Bitte akzeptiere die AGB.</p>
+          }
+
+          @if (errors().length > 0) {
+            <ul class="space-y-1 rounded-2xl bg-red-50 p-4 text-sm text-red-800" role="alert">
+              @for (error of errors(); track error) {
+                <li>{{ error }}</li>
+              }
+              <li class="pt-1">
+                <a routerLink="/warenkorb" class="font-semibold underline">Warenkorb prüfen</a>
+              </li>
+            </ul>
+          }
+
+          <button
+            type="submit"
+            [disabled]="submitting()"
+            class="w-full rounded-full bg-navy px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-navy/20 transition hover:bg-navy-800 disabled:opacity-60"
+          >
+            {{ submitting() ? 'Einen Moment …' : 'Weiter zur Zahlung' }}
+          </button>
+          <p class="text-center text-xs text-ink/60">
+            Du bezahlst sicher bei Stripe mit TWINT, Karte, Apple Pay oder Google Pay.
+          </p>
+        </aside>
+      </form>
+    }
+  </div>
+</section>
