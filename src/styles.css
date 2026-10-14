@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-mais: #e7c003;
+  --color-ink: #1b1b1b;
+  --font-display: ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
+}
