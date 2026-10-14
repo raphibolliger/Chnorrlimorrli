@@ -28,6 +28,7 @@ Content is German (Swiss tone, never use ß, always ss).
 - Schema changes only as migrations in `supabase/migrations/`. Regenerate `src/types/database.types.ts` with `npm run db:types` after every schema change (CI fails on drift).
 - Every table in `public` has RLS. Catalogue and shipping tables are publicly readable when active, writable only for admins (`public.is_admin()`, backed by the private schema `app`). Orders are never publicly readable; edge functions write them with the service role through the security-definer functions in `20261015000200_order_functions.sql`.
 - Admin users and `app.admins` rows are created directly in Supabase, never in the repository.
+- The initial catalogue and shipping methods from Ecwid are a data migration (`20261015000400_catalogue_from_ecwid.sql`). Their product images live in `supabase/seed/product-images/` and are uploaded to the `product-images` bucket under `seed/` by `supabase/scripts/upload-seed-images.sh` (locally after `npx supabase db reset`, remotely by the deploy workflow).
 - Local development: `npx supabase start` (Docker) runs the full stack on :54321, Mailpit on :54324. `npm start` uses the local stack (`environment.development.ts`).
 
 ## Commands

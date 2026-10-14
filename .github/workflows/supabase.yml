@@ -42,6 +42,14 @@ jobs:
       - name: Apply migrations
         if: steps.credentials.outputs.ready == 'true'
         run: supabase db push
+      - name: Upload seed product images
+        if: steps.credentials.outputs.ready == 'true'
+        run: |
+          service_key=$(supabase projects api-keys --project-ref "$PROJECT_REF" --reveal -o json \
+            | jq -r 'map(select(.name == "service_role" or .type == "secret")) | first | .api_key')
+          echo "::add-mask::$service_key"
+          SUPABASE_URL="https://$PROJECT_REF.supabase.co" SUPABASE_SERVICE_KEY="$service_key" \
+            supabase/scripts/upload-seed-images.sh
       - name: Set function secrets
         if: steps.credentials.outputs.ready == 'true'
         env:
