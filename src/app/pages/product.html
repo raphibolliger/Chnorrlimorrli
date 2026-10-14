@@ -1,0 +1,176 @@
+<section class="bg-cream">
+  <div class="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+    <a
+      routerLink="/shop"
+      class="inline-flex items-center gap-2 text-sm font-semibold text-navy hover:underline"
+      ><span aria-hidden="true">←</span> Zurück zum Shop</a
+    >
+
+    @if (product.isLoading()) {
+      <div class="mt-6 grid gap-8 md:grid-cols-2" aria-hidden="true">
+        <div class="aspect-square animate-pulse rounded-3xl bg-white/70"></div>
+        <div class="space-y-4">
+          <div class="h-10 w-3/4 animate-pulse rounded-xl bg-white/70"></div>
+          <div class="h-6 w-1/4 animate-pulse rounded-xl bg-white/70"></div>
+          <div class="h-32 animate-pulse rounded-xl bg-white/70"></div>
+        </div>
+      </div>
+    } @else if (product.value(); as product) {
+      <div class="mt-6 grid gap-8 md:grid-cols-2 md:gap-12">
+        <div>
+          <div
+            class="relative aspect-square overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-ink/5"
+          >
+            @if (selectedImage(); as image) {
+              <app-product-image
+                [path]="image.storage_path"
+                [alt]="image.alt ?? product.name"
+                [priority]="true"
+                imageClass="object-contain p-6"
+              />
+            }
+          </div>
+          @if (product.product_images.length > 1) {
+            <ul class="mt-4 flex gap-3 overflow-x-auto pb-1">
+              @for (image of product.product_images; track image.id) {
+                <li class="shrink-0">
+                  <button
+                    type="button"
+                    (click)="selectedImage.set(image)"
+                    class="relative block size-20 overflow-hidden rounded-2xl bg-white ring-2 transition"
+                    [class.ring-navy]="image.id === selectedImage()?.id"
+                    [class.ring-transparent]="image.id !== selectedImage()?.id"
+                    [attr.aria-label]="'Bild anzeigen: ' + (image.alt ?? product.name)"
+                    [attr.aria-pressed]="image.id === selectedImage()?.id"
+                  >
+                    <app-product-image
+                      [path]="image.storage_path"
+                      imageClass="object-contain p-1"
+                    />
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
+        <div>
+          <h1 class="text-3xl font-bold text-navy sm:text-4xl">{{ product.name }}</h1>
+          <p class="mt-3 text-2xl font-semibold">{{ product.price_rappen | chf }}</p>
+          <p class="mt-1 text-sm text-ink/60">
+            Preis inkl. allfälliger Abgaben, zuzüglich Versandkosten.
+          </p>
+
+          <div class="mt-6 space-y-3 leading-relaxed text-ink/85">
+            @for (paragraph of paragraphs(); track $index) {
+              <p>{{ paragraph }}</p>
+            }
+          </div>
+
+          @if (soldOut()) {
+            <p class="mt-8 rounded-2xl bg-white p-5 font-semibold shadow-sm">
+              Dieser Artikel ist leider ausverkauft.
+            </p>
+          } @else {
+            <form class="mt-8 space-y-6" (submit)="$event.preventDefault(); addToCart()">
+              @for (option of product.product_options; track option.id) {
+                <fieldset>
+                  <legend class="font-semibold">{{ option.name }}</legend>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    @for (choice of option.choices; track choice) {
+                      <button
+                        type="button"
+                        (click)="selectOption(option.name, choice)"
+                        class="min-w-14 rounded-full px-4 py-2 font-semibold ring-1 transition"
+                        [class]="
+                          selectedOptions()[option.name] === choice
+                            ? 'bg-navy text-white ring-navy'
+                            : 'bg-white text-ink ring-ink/20 hover:ring-navy'
+                        "
+                        [attr.aria-pressed]="selectedOptions()[option.name] === choice"
+                      >
+                        {{ choice }}
+                      </button>
+                    }
+                  </div>
+                </fieldset>
+              }
+
+              <div>
+                <p class="font-semibold" id="quantity-label">Anzahl</p>
+                <div
+                  class="mt-2 inline-flex items-center rounded-full bg-white ring-1 ring-ink/20"
+                  role="group"
+                  aria-labelledby="quantity-label"
+                >
+                  <button
+                    type="button"
+                    (click)="changeQuantity(-1)"
+                    [disabled]="quantity() <= 1"
+                    class="size-11 rounded-full text-xl font-semibold disabled:opacity-30"
+                    aria-label="Anzahl verringern"
+                  >
+                    −
+                  </button>
+                  <span class="w-10 text-center font-semibold" aria-live="polite">{{
+                    quantity()
+                  }}</span>
+                  <button
+                    type="button"
+                    (click)="changeQuantity(1)"
+                    [disabled]="quantity() >= maxQuantity()"
+                    class="size-11 rounded-full text-xl font-semibold disabled:opacity-30"
+                    aria-label="Anzahl erhöhen"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  [disabled]="missingOptions().length > 0"
+                  class="w-full rounded-full bg-navy px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-navy/20 transition hover:bg-navy-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                >
+                  In den Warenkorb
+                </button>
+                @if (missingOptions().length > 0) {
+                  <p class="mt-2 text-sm text-ink/60">
+                    Bitte wähle zuerst: {{ missingOptions().join(', ') }}
+                  </p>
+                }
+              </div>
+
+              @if (added()) {
+                <div class="rounded-2xl bg-mais-100 p-4" role="status">
+                  <p class="font-semibold">Im Warenkorb!</p>
+                  <div class="mt-3 flex flex-wrap gap-3">
+                    <a
+                      routerLink="/warenkorb"
+                      class="rounded-full bg-navy px-5 py-2.5 font-semibold text-white"
+                      >Zum Warenkorb</a
+                    >
+                    <a
+                      routerLink="/shop"
+                      class="rounded-full px-5 py-2.5 font-semibold text-navy ring-1 ring-navy/30"
+                      >Weiter einkaufen</a
+                    >
+                  </div>
+                </div>
+              }
+            </form>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="mt-6 rounded-3xl bg-white p-8 shadow-sm">
+        <h1 class="text-2xl font-bold text-navy">Produkt nicht gefunden</h1>
+        <p class="mt-2">Dieses Produkt gibt es nicht (mehr).</p>
+        <a routerLink="/shop" class="mt-4 inline-block font-semibold text-navy underline"
+          >Zum Shop</a
+        >
+      </div>
+    }
+  </div>
+</section>

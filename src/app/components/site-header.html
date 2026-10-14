@@ -1,5 +1,5 @@
 <header class="sticky top-0 z-40 border-b border-ink/10 bg-cream/95 backdrop-blur">
-  <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+  <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4">
     <a
       routerLink="/"
       (click)="closeMenu()"
@@ -27,15 +27,74 @@
         class="ml-2 rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white transition hover:bg-navy-800"
         >Shop</a
       >
+      <a
+        routerLink="/warenkorb"
+        (click)="closeMenu()"
+        class="relative inline-flex size-11 items-center justify-center rounded-full text-navy hover:bg-mais-100"
+        [attr.aria-label]="'Warenkorb, ' + cart.count() + ' Artikel'"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="size-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2"
+          />
+          <circle cx="10" cy="20" r="1.2" />
+          <circle cx="17" cy="20" r="1.2" />
+        </svg>
+        <span
+          class="absolute -top-0.5 -right-0.5 min-w-5 rounded-full bg-mais px-1 text-center text-xs leading-5 font-bold text-navy"
+          [class.hidden]="cart.count() === 0"
+          aria-hidden="true"
+          >{{ cart.count() }}</span
+        >
+      </a>
     </nav>
 
-    <div class="flex items-center gap-2 lg:hidden">
+    <div class="flex shrink-0 items-center gap-0.5 lg:hidden">
       <a
         routerLink="/shop"
         (click)="closeMenu()"
         class="rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white"
         >Shop</a
       >
+      <a
+        routerLink="/warenkorb"
+        (click)="closeMenu()"
+        class="relative inline-flex size-11 items-center justify-center rounded-full text-navy hover:bg-mais-100"
+        [attr.aria-label]="'Warenkorb, ' + cart.count() + ' Artikel'"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="size-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2"
+          />
+          <circle cx="10" cy="20" r="1.2" />
+          <circle cx="17" cy="20" r="1.2" />
+        </svg>
+        <span
+          class="absolute -top-0.5 -right-0.5 min-w-5 rounded-full bg-mais px-1 text-center text-xs leading-5 font-bold text-navy"
+          [class.hidden]="cart.count() === 0"
+          aria-hidden="true"
+          >{{ cart.count() }}</span
+        >
+      </a>
+
       <button
         type="button"
         (click)="toggleMenu()"
