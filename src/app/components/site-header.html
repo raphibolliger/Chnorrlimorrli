@@ -16,8 +16,9 @@
       @for (item of navigation; track item.path) {
         <a
           [routerLink]="item.path"
-          routerLinkActive="bg-mais-100 text-navy"
-          class="rounded-full px-3 py-2 text-sm font-medium text-ink/80 transition hover:bg-mais-100 hover:text-navy"
+          routerLinkActive
+          ariaCurrentWhenActive="page"
+          class="rounded-full px-3 py-2 text-sm font-medium text-ink/80 transition hover:bg-mais-100 hover:text-navy aria-[current=page]:bg-mais-100 aria-[current=page]:text-navy"
           >{{ item.label }}</a
         >
       }
@@ -150,8 +151,9 @@
             <a
               [routerLink]="item.path"
               (click)="closeMenu()"
-              routerLinkActive="bg-mais-100 text-navy"
-              class="block rounded-xl px-3 py-3 font-medium hover:bg-mais-100"
+              routerLinkActive
+              ariaCurrentWhenActive="page"
+              class="block rounded-xl px-3 py-3 font-medium hover:bg-mais-100 aria-[current=page]:bg-mais-100 aria-[current=page]:text-navy"
               >{{ item.label }}</a
             >
           </li>

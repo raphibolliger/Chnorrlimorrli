@@ -1,0 +1,297 @@
+<a
+  routerLink="/admin/produkte"
+  class="inline-flex items-center gap-2 text-sm font-semibold text-navy hover:underline"
+  ><span aria-hidden="true">←</span> Alle Produkte</a
+>
+
+@if (product.isLoading() && !product.hasValue()) {
+  <div class="mt-4 h-96 animate-pulse rounded-2xl bg-white/70" aria-hidden="true"></div>
+} @else if (!isNew() && !product.value()) {
+  <p class="mt-4 rounded-2xl bg-white p-6">Produkt nicht gefunden.</p>
+} @else {
+  <h1 class="mt-3 text-2xl font-bold text-navy">{{ isNew() ? 'Neues Produkt' : name() }}</h1>
+
+  <form class="mt-4 space-y-4" (submit)="$event.preventDefault(); save()">
+    <section class="space-y-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
+      <label class="block">
+        <span class="text-sm font-semibold">Name</span>
+        <input
+          name="name"
+          [ngModel]="name()"
+          (ngModelChange)="updateName($event)"
+          required
+          class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+        />
+      </label>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block">
+          <span class="text-sm font-semibold">URL-Kürzel</span>
+          <input
+            name="slug"
+            [ngModel]="slug()"
+            (ngModelChange)="updateSlug($event)"
+            class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 font-mono text-sm ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+          />
+          <span class="mt-1 block text-xs text-ink/60">/shop/{{ slug() }}</span>
+        </label>
+        <label class="block">
+          <span class="text-sm font-semibold">Art.-Nr.</span>
+          <input
+            name="sku"
+            [ngModel]="sku()"
+            (ngModelChange)="sku.set($event)"
+            class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+          />
+        </label>
+        <label class="block">
+          <span class="text-sm font-semibold">Preis (CHF)</span>
+          <input
+            name="price"
+            inputmode="decimal"
+            [ngModel]="price()"
+            (ngModelChange)="price.set($event)"
+            placeholder="40.00"
+            class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+            [class.ring-red-500]="price() !== '' && priceRappen() === null"
+          />
+        </label>
+        <label class="block">
+          <span class="text-sm font-semibold">Reihenfolge</span>
+          <input
+            name="sortOrder"
+            type="number"
+            [ngModel]="sortOrder()"
+            (ngModelChange)="sortOrder.set($event)"
+            class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+          />
+        </label>
+      </div>
+      <label class="block">
+        <span class="text-sm font-semibold"
+          >Kurzbeschreibung <span class="font-normal text-ink/60">(in der Produktliste)</span></span
+        >
+        <input
+          name="shortDescription"
+          [ngModel]="shortDescription()"
+          (ngModelChange)="shortDescription.set($event)"
+          class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+        />
+      </label>
+      <label class="block">
+        <span class="text-sm font-semibold"
+          >Beschreibung
+          <span class="font-normal text-ink/60">(Leerzeile = neuer Absatz)</span></span
+        >
+        <textarea
+          name="description"
+          rows="6"
+          [ngModel]="description()"
+          (ngModelChange)="description.set($event)"
+          class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+        ></textarea>
+      </label>
+      <label class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          name="active"
+          [ngModel]="active()"
+          (ngModelChange)="active.set($event)"
+          class="size-5 accent-navy"
+        />
+        <span class="font-semibold">Im Shop sichtbar</span>
+      </label>
+    </section>
+
+    <section class="space-y-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
+      <h2 class="font-semibold text-navy">Lager</h2>
+      <label class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          name="trackStock"
+          [ngModel]="trackStock()"
+          (ngModelChange)="trackStock.set($event)"
+          class="size-5 accent-navy"
+        />
+        <span>Lagerbestand führen</span>
+      </label>
+      @if (trackStock()) {
+        <label class="block max-w-40">
+          <span class="text-sm font-semibold">Stück an Lager</span>
+          <input
+            name="stock"
+            type="number"
+            min="0"
+            [ngModel]="stock()"
+            (ngModelChange)="stock.set($event)"
+            class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+          />
+        </label>
+      } @else {
+        <p class="text-sm text-ink/60">Unbegrenzt bestellbar.</p>
+      }
+    </section>
+
+    <section class="space-y-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
+      <h2 class="font-semibold text-navy">Optionen</h2>
+      <p class="text-sm text-ink/60">
+        Zum Beispiel Grösse mit den Werten «31-35, 39-46». Werte mit Komma trennen.
+      </p>
+      @for (option of options(); track $index; let index = $index) {
+        <div class="grid gap-2 rounded-xl bg-cream p-3 sm:grid-cols-[minmax(0,160px)_1fr_auto]">
+          <input
+            [name]="'optionName' + index"
+            [ngModel]="option.name"
+            (ngModelChange)="updateOption(index, 'name', $event)"
+            placeholder="Name, z. B. Grösse"
+            class="rounded-xl border-0 bg-white px-3 py-2 ring-1 ring-ink/15"
+          />
+          <input
+            [name]="'optionChoices' + index"
+            [ngModel]="option.choices"
+            (ngModelChange)="updateOption(index, 'choices', $event)"
+            placeholder="Werte, mit Komma getrennt"
+            class="rounded-xl border-0 bg-white px-3 py-2 ring-1 ring-ink/15"
+          />
+          <button
+            type="button"
+            (click)="removeOption(index)"
+            class="text-sm font-semibold text-red-700"
+          >
+            Entfernen
+          </button>
+        </div>
+      }
+      <button type="button" (click)="addOption()" class="text-sm font-semibold text-navy underline">
+        Option hinzufügen
+      </button>
+    </section>
+
+    @if (message(); as message) {
+      <p
+        class="rounded-2xl p-3 text-sm"
+        [class]="message.tone === 'ok' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'"
+        role="status"
+      >
+        {{ message.text }}
+      </p>
+    }
+
+    <div class="sticky bottom-0 -mx-4 flex gap-3 bg-cream/95 px-4 py-3 backdrop-blur">
+      <button
+        type="submit"
+        [disabled]="saving()"
+        class="flex-1 rounded-full bg-navy px-6 py-3 font-semibold text-white disabled:opacity-60 sm:flex-none"
+      >
+        {{ saving() ? 'Speichern …' : 'Speichern' }}
+      </button>
+    </div>
+  </form>
+
+  @if (product.value(); as current) {
+    <section class="mt-4 space-y-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
+      <h2 class="font-semibold text-navy">Bilder</h2>
+      <p class="text-sm text-ink/60">
+        Das erste Bild erscheint in der Produktliste. Bilder werden beim Hochladen verkleinert.
+      </p>
+      <ul class="space-y-3">
+        @for (
+          image of current.product_images;
+          track image.id;
+          let index = $index;
+          let first = $first;
+          let last = $last
+        ) {
+          <li class="flex items-center gap-3 rounded-xl bg-cream p-2">
+            <div class="relative size-20 shrink-0 overflow-hidden rounded-lg bg-white">
+              <app-product-image
+                [path]="image.storage_path"
+                [alt]="image.alt ?? ''"
+                imageClass="object-contain p-1"
+              />
+            </div>
+            <input
+              [value]="image.alt ?? ''"
+              (change)="saveAlt(image.id, $any($event.target).value)"
+              placeholder="Bildbeschreibung"
+              aria-label="Bildbeschreibung"
+              class="min-w-0 flex-1 rounded-lg border-0 bg-white px-3 py-2 text-sm ring-1 ring-ink/15"
+            />
+            <div class="flex shrink-0 flex-col gap-1">
+              <button
+                type="button"
+                (click)="moveImage(index, -1)"
+                [disabled]="first"
+                class="rounded px-2 text-sm disabled:opacity-30"
+                aria-label="Nach oben"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                (click)="moveImage(index, 1)"
+                [disabled]="last"
+                class="rounded px-2 text-sm disabled:opacity-30"
+                aria-label="Nach unten"
+              >
+                ↓
+              </button>
+            </div>
+            <button
+              type="button"
+              (click)="removeImage(image.id, image.storage_path)"
+              class="shrink-0 text-sm font-semibold text-red-700"
+            >
+              Löschen
+            </button>
+          </li>
+        }
+      </ul>
+      <label
+        class="inline-flex cursor-pointer items-center gap-2 rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white"
+      >
+        {{ uploading() ? 'Hochladen …' : 'Bilder hochladen' }}
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          class="sr-only"
+          (change)="upload($event)"
+          [disabled]="uploading()"
+        />
+      </label>
+    </section>
+
+    <section class="mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
+      <h2 class="font-semibold text-red-800">Produkt löschen</h2>
+      <p class="mt-1 text-sm text-ink/60">
+        Bestehende Bestellungen bleiben erhalten. Meist genügt es, das Produkt auszublenden.
+      </p>
+      @if (confirmDelete()) {
+        <div class="mt-3 flex gap-2">
+          <button
+            type="button"
+            (click)="remove()"
+            class="rounded-full bg-red-700 px-4 py-2 text-sm font-semibold text-white"
+          >
+            Endgültig löschen
+          </button>
+          <button
+            type="button"
+            (click)="confirmDelete.set(false)"
+            class="rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-ink/20"
+          >
+            Abbrechen
+          </button>
+        </div>
+      } @else {
+        <button
+          type="button"
+          (click)="confirmDelete.set(true)"
+          class="mt-3 text-sm font-semibold text-red-700 underline"
+        >
+          Löschen …
+        </button>
+      }
+    </section>
+  }
+}
