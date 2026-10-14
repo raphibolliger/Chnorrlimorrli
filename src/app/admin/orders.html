@@ -1,2 +1,75 @@
-<h1 class="text-2xl font-bold text-navy">Bestellungen</h1>
-<p class="mt-2 text-ink/70">Folgt.</p>
+<div class="flex flex-wrap items-end justify-between gap-3">
+  <h1 class="text-2xl font-bold text-navy">Bestellungen</h1>
+  <button type="button" (click)="orders.reload()" class="text-sm font-semibold text-navy underline">
+    Aktualisieren
+  </button>
+</div>
+
+<div class="mt-4 flex gap-2 overflow-x-auto pb-1">
+  @for (option of views; track option.value) {
+    <button
+      type="button"
+      (click)="view.set(option.value)"
+      class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold ring-1"
+      [class]="
+        view() === option.value ? 'bg-navy text-white ring-navy' : 'bg-white text-ink ring-ink/15'
+      "
+    >
+      {{ option.label }}
+    </button>
+  }
+</div>
+
+<label class="mt-3 block">
+  <span class="sr-only">Suchen</span>
+  <input
+    type="search"
+    placeholder="Name, E-Mail oder Bestellnummer"
+    [value]="search()"
+    (input)="search.set($any($event.target).value)"
+    class="w-full rounded-xl border-0 bg-white px-4 py-3 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+  />
+</label>
+
+@if (orders.isLoading() && !orders.hasValue()) {
+  <div class="mt-4 space-y-3" aria-hidden="true">
+    @for (placeholder of [1, 2, 3]; track placeholder) {
+      <div class="h-20 animate-pulse rounded-2xl bg-white/70"></div>
+    }
+  </div>
+} @else if (orders.error()) {
+  <p class="mt-4 rounded-2xl bg-red-50 p-4 text-red-800">
+    Die Bestellungen konnten nicht geladen werden.
+  </p>
+} @else {
+  <ul class="mt-4 space-y-3">
+    @for (order of orders.value(); track order.id) {
+      <li>
+        <a
+          [routerLink]="['/admin/bestellungen', order.id]"
+          class="block rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5 hover:ring-navy/40"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="font-semibold text-navy">
+                #{{ order.order_number }} · {{ order.first_name }} {{ order.last_name }}
+              </p>
+              <p class="truncate text-sm text-ink/60">
+                {{ order.created_at | date: 'd.M.yyyy, HH:mm' }} · {{ order.shipping_name }}
+              </p>
+            </div>
+            <p class="shrink-0 font-semibold">{{ order.total_rappen | chf }}</p>
+          </div>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <app-status-badge [payment]="order.payment_status" />
+            @if (order.payment_status === 'paid' || order.fulfillment_status === 'cancelled') {
+              <app-status-badge [fulfillment]="order.fulfillment_status" />
+            }
+          </div>
+        </a>
+      </li>
+    } @empty {
+      <li class="rounded-2xl bg-white p-6 text-center text-ink/60">Keine Bestellungen.</li>
+    }
+  </ul>
+}

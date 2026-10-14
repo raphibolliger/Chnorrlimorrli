@@ -426,3 +426,6 @@ verify_jwt = false
 
 [functions.order-summary]
 verify_jwt = false
+
+[functions.admin-update-order]
+verify_jwt = false
