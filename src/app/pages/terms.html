@@ -1,0 +1,89 @@
+<app-page-intro eyebrow="Rechtliches" title="Allgemeine Geschäftsbedingungen" />
+
+<section class="bg-cream">
+  <div class="mx-auto max-w-3xl space-y-8 px-4 py-14 leading-relaxed">
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">1. Geltungsbereich</h2>
+      <p class="mt-3">
+        Diese AGB gelten für alle Bestellungen im Online-Shop des Vereins Chnorrlimorrli, 5612
+        Villmergen (nachfolgend «Verein»). Mit der Bestellung akzeptierst du diese AGB.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">2. Angebot und Vertragsabschluss</h2>
+      <p class="mt-3">
+        Die Darstellung der Produkte im Shop ist ein unverbindliches Angebot. Der Vertrag kommt
+        zustande, sobald du die Bestellung abschliesst und die Zahlung erfolgreich war. Du erhältst
+        anschliessend eine Bestellbestätigung per E-Mail.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">3. Preise</h2>
+      <p class="mt-3">
+        Alle Preise verstehen sich in Schweizer Franken (CHF). Der Verein ist nicht
+        mehrwertsteuerpflichtig, es wird keine Mehrwertsteuer ausgewiesen. Allfällige Versandkosten
+        werden vor dem Bezahlen separat angezeigt.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">4. Zahlung</h2>
+      <p class="mt-3">
+        Die Zahlung erfolgt bei der Bestellung im Voraus über unseren Zahlungsanbieter Stripe mit
+        TWINT, Kredit- oder Debitkarte, Apple Pay oder Google Pay.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">5. Lieferung und Abholung</h2>
+      <p class="mt-3">
+        Wir liefern ausschliesslich in die Schweiz. Je nach gewählter Versandart erfolgt die
+        Lieferung per Post, durch den Hauslieferdienst des Vereins im Freiamt oder als Abholung in
+        Villmergen nach Absprache. Details und Kosten stehen unter
+        <a routerLink="/versand-und-zahlung" class="text-navy underline">Versand und Zahlung</a>.
+        <app-open-point text="Lieferfrist für den Postversand" />
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">6. Rückgabe und Umtausch</h2>
+      <p class="mt-3">
+        <app-open-point
+          text="Rückgaberegel festlegen, zum Beispiel Rückgabe ungelesener Bücher innert 14 Tagen"
+        />
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">7. Gewährleistung</h2>
+      <p class="mt-3">
+        Bitte prüfe die Ware nach Erhalt. Beschädigte oder fehlerhafte Artikel melde uns bitte
+        innert 7 Tagen an
+        <a [href]="'mailto:' + contactEmail" class="text-navy underline">{{ contactEmail }}</a
+        >. Wir ersetzen den Artikel oder erstatten den Kaufpreis.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">8. Datenschutz</h2>
+      <p class="mt-3">
+        Wie wir mit deinen Daten umgehen, steht in der
+        <a routerLink="/datenschutz" class="text-navy underline">Datenschutzerklärung</a>.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">9. Anwendbares Recht und Gerichtsstand</h2>
+      <p class="mt-3">
+        Es gilt Schweizer Recht. Gerichtsstand ist der Sitz des Vereins, soweit das Gesetz nichts
+        anderes vorschreibt.
+      </p>
+    </div>
+
+    <p class="text-sm text-ink/60">
+      Stand: Oktober 2026. <app-open-point text="Prüfung der AGB durch den Verein" />
+    </p>
+  </div>
+</section>
