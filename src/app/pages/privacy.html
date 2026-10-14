@@ -1,0 +1,106 @@
+<app-page-intro eyebrow="Rechtliches" title="Datenschutzerklärung" />
+
+<section class="bg-cream">
+  <div class="mx-auto max-w-3xl space-y-8 px-4 py-14 leading-relaxed">
+    <p>
+      Der Verein Chnorrlimorrli nimmt den Schutz deiner Daten ernst. Diese Datenschutzerklärung
+      erklärt, welche Personendaten wir auf dieser Webseite und im Shop bearbeiten und wozu. Sie
+      richtet sich nach dem Schweizer Datenschutzgesetz (DSG).
+    </p>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">Verantwortlich</h2>
+      <p class="mt-3">
+        Verein Chnorrlimorrli, <app-open-point text="Strasse und Hausnummer" />, 5612 Villmergen<br />
+        E-Mail:
+        <a [href]="'mailto:' + contactEmail" class="text-navy underline">{{ contactEmail }}</a>
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">Welche Daten wir bearbeiten</h2>
+      <ul class="mt-3 list-disc space-y-2 pl-6">
+        <li>
+          <strong>Besuch der Webseite:</strong> technisch notwendige Daten, die beim Aufruf jeder
+          Webseite anfallen (IP-Adresse, Zeitpunkt, aufgerufene Seite, Browser).
+        </li>
+        <li>
+          <strong>Bestellungen:</strong> Vorname, Nachname, E-Mail-Adresse, Telefonnummer
+          (freiwillig), Lieferadresse, bestellte Artikel, gewählte Versandart und deine Bemerkung.
+          Wir verwenden diese Daten, um die Bestellung abzuwickeln, zu liefern, dich über den Stand
+          zu informieren und unsere Buchhaltung zu führen.
+        </li>
+        <li>
+          <strong>Zahlung:</strong> Die Zahlung wird vollständig von Stripe abgewickelt. Wir
+          erhalten nur die Information, ob und womit bezahlt wurde, nicht aber deine Karten- oder
+          TWINT-Daten.
+        </li>
+        <li>
+          <strong>E-Mail-Kontakt:</strong> Wenn du uns schreibst, verwenden wir deine Angaben, um
+          deine Anfrage zu beantworten.
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">Dienstleister</h2>
+      <p class="mt-3">
+        Für den Betrieb setzen wir folgende Dienstleister ein. Sie bearbeiten Daten nur in unserem
+        Auftrag und für die genannten Zwecke.
+      </p>
+      <ul class="mt-4 space-y-3">
+        @for (processor of processors; track processor.name) {
+          <li class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
+            <p class="font-semibold text-navy">{{ processor.name }}</p>
+            <p class="text-sm text-ink/60">{{ processor.company }}</p>
+            <p class="mt-1">{{ processor.purpose }}</p>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">Bekanntgabe ins Ausland</h2>
+      <p class="mt-3">
+        Einzelne Dienstleister bearbeiten Daten in der EU oder in den USA. Für die USA stützen wir
+        uns auf das Swiss-U.S. Data Privacy Framework oder auf Standardvertragsklauseln, die einen
+        angemessenen Schutz gewährleisten.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">Cookies und lokaler Speicher</h2>
+      <p class="mt-3">
+        Wir verwenden keine Tracking- oder Werbe-Cookies. Dein Warenkorb wird nur im lokalen
+        Speicher deines Browsers abgelegt, bis du bestellst oder ihn leerst. Beim Bezahlen setzt
+        Stripe die für die sichere Zahlung notwendigen Cookies.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">Aufbewahrung</h2>
+      <p class="mt-3">
+        Bestelldaten bewahren wir so lange auf, wie es die gesetzlichen Aufbewahrungspflichten
+        verlangen (in der Regel zehn Jahre). Andere Daten löschen wir, sobald sie nicht mehr
+        benötigt werden.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">Deine Rechte</h2>
+      <p class="mt-3">
+        Du kannst jederzeit Auskunft über deine bei uns gespeicherten Daten verlangen und deren
+        Berichtigung oder Löschung beantragen, soweit keine gesetzliche Aufbewahrungspflicht
+        besteht. Schreib uns dazu an
+        <a [href]="'mailto:' + contactEmail" class="text-navy underline">{{ contactEmail }}</a
+        >. Du hast zudem das Recht, dich beim Eidgenössischen Datenschutz- und
+        Öffentlichkeitsbeauftragten (EDÖB) zu beschweren.
+      </p>
+    </div>
+
+    <p class="text-sm text-ink/60">
+      Stand: Oktober 2026.
+      <app-open-point text="Prüfung der Datenschutzerklärung durch den Verein" />
+    </p>
+  </div>
+</section>

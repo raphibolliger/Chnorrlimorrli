@@ -1,0 +1,106 @@
+<app-page-intro eyebrow="Rechtliches" title="Versand und Zahlung" />
+
+<section class="bg-cream">
+  <div class="mx-auto max-w-3xl space-y-10 px-4 py-14 leading-relaxed">
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">Versandarten</h2>
+      <p class="mt-3">Wir liefern ausschliesslich in die Schweiz.</p>
+
+      @if (methods(); as methods) {
+        <ul class="mt-5 space-y-4">
+          @for (method of methods; track method.id) {
+            <li class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
+              <div class="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 class="text-xl font-semibold text-navy">{{ method.name }}</h3>
+                <p class="font-semibold">
+                  @if (method.shipping_rates.length === 1) {
+                    @if (method.shipping_rates[0].price_rappen === 0) {
+                      kostenlos
+                    } @else {
+                      {{ method.shipping_rates[0].price_rappen | chf }}
+                    }
+                  }
+                </p>
+              </div>
+              @if (method.description) {
+                <p class="mt-2 text-ink/80">{{ method.description }}</p>
+              }
+              @if (method.shipping_rates.length > 1) {
+                <ul class="mt-3 space-y-1 text-sm">
+                  @for (rate of method.shipping_rates; track rate.id; let last = $last) {
+                    <li>
+                      Warenwert ab {{ rate.from_subtotal_rappen | chf }}:
+                      <strong>{{
+                        rate.price_rappen === 0 ? 'kostenlos' : (rate.price_rappen | chf)
+                      }}</strong>
+                    </li>
+                  }
+                </ul>
+              }
+              @if (method.kind === 'pickup' && method.pickup_location) {
+                <p class="mt-2 text-sm text-ink/70">
+                  Abholort: {{ method.pickup_location }}
+                  @if (method.pickup_hours) {
+                    · {{ method.pickup_hours }}
+                  }
+                </p>
+              }
+              @if (method.kind === 'local_delivery' && method.postal_codes.length > 0) {
+                <details class="mt-3 text-sm">
+                  <summary class="cursor-pointer font-semibold text-navy">
+                    Liefergebiet ({{ method.postal_codes.length }} Postleitzahlen)
+                  </summary>
+                  <p class="mt-2 text-ink/70">{{ method.postal_codes.join(', ') }}</p>
+                </details>
+              }
+            </li>
+          }
+        </ul>
+      } @else if (loadFailed()) {
+        <p class="mt-5 rounded-2xl bg-white p-5 text-ink/80 shadow-sm">
+          Die Versandarten konnten gerade nicht geladen werden. Sie werden dir im Warenkorb
+          angezeigt.
+        </p>
+      } @else {
+        <div class="mt-5 space-y-4" aria-hidden="true">
+          @for (placeholder of [1, 2, 3]; track placeholder) {
+            <div class="h-24 animate-pulse rounded-2xl bg-white/70"></div>
+          }
+        </div>
+      }
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">Lieferfristen</h2>
+      <p class="mt-3">
+        Bestellungen werden in der Regel innert weniger Tage bearbeitet. Den Hauslieferdienst im
+        Freiamt erledigen wir innerhalb einer Woche.
+        <app-open-point text="Lieferfrist für den Postversand" />
+      </p>
+    </div>
+
+    <div>
+      <h2 class="text-2xl font-semibold text-navy">Zahlung</h2>
+      <p class="mt-3">
+        Bezahlt wird bei der Bestellung im Voraus über unseren Zahlungsanbieter Stripe. Möglich
+        sind:
+      </p>
+      <ul class="mt-3 flex flex-wrap gap-2">
+        @for (
+          method of ['TWINT', 'Kredit- und Debitkarte', 'Apple Pay', 'Google Pay'];
+          track method
+        ) {
+          <li
+            class="rounded-full bg-white px-4 py-2 text-sm font-semibold shadow-sm ring-1 ring-ink/5"
+          >
+            {{ method }}
+          </li>
+        }
+      </ul>
+      <p class="mt-4">
+        Alle Preise in CHF. Der Verein ist nicht mehrwertsteuerpflichtig. Weitere Bedingungen stehen
+        in den <a routerLink="/agb" class="text-navy underline">AGB</a>.
+      </p>
+    </div>
+  </div>
+</section>

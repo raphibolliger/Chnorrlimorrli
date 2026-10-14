@@ -5,8 +5,13 @@ import { Database } from '../../types/database.types';
 
 @Injectable({ providedIn: 'root' })
 export class Supabase {
-  readonly client: SupabaseClient<Database> = createClient<Database>(
-    environment.supabaseUrl,
-    environment.supabasePublishableKey,
-  );
+  private instance?: SupabaseClient<Database>;
+
+  get client(): SupabaseClient<Database> {
+    this.instance ??= createClient<Database>(
+      environment.supabaseUrl,
+      environment.supabasePublishableKey,
+    );
+    return this.instance;
+  }
 }

@@ -46,6 +46,26 @@ export const routes: Routes = [
         'Der Chnorrlimorrli-Rap, die Chnorrlimorrli-Bänkli, das Chnorrlimorrli-Brot und die Familienwanderung.',
     },
   },
+  {
+    path: 'impressum',
+    loadComponent: () => import('./pages/imprint').then((m) => m.Imprint),
+    title: 'Impressum – Chnorrlimorrli',
+  },
+  {
+    path: 'datenschutz',
+    loadComponent: () => import('./pages/privacy').then((m) => m.Privacy),
+    title: 'Datenschutzerklärung – Chnorrlimorrli',
+  },
+  {
+    path: 'agb',
+    loadComponent: () => import('./pages/terms').then((m) => m.Terms),
+    title: 'AGB – Chnorrlimorrli',
+  },
+  {
+    path: 'versand-und-zahlung',
+    loadComponent: () => import('./pages/shipping-payment').then((m) => m.ShippingPayment),
+    title: 'Versand und Zahlung – Chnorrlimorrli',
+  },
   { path: 'products', redirectTo: 'shop' },
   { path: 'products/:legacyPath', redirectTo: 'shop' },
   {
