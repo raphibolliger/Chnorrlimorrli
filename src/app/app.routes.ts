@@ -66,6 +66,25 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/shipping-payment').then((m) => m.ShippingPayment),
     title: 'Versand und Zahlung – Chnorrlimorrli',
   },
+  {
+    path: 'shop',
+    loadComponent: () => import('./pages/shop').then((m) => m.Shop),
+    title: 'Shop – Chnorrlimorrli',
+    data: {
+      description:
+        'Die Chnorrlimorrli-Bücher und Chnorrlimorrli-Socken online bestellen. Versand in die ganze Schweiz, Lieferung im Freiamt oder Abholung in Villmergen.',
+    },
+  },
+  {
+    path: 'shop/:slug',
+    loadComponent: () => import('./pages/product').then((m) => m.ProductPage),
+    title: 'Shop – Chnorrlimorrli',
+  },
+  {
+    path: 'warenkorb',
+    loadComponent: () => import('./pages/cart-page').then((m) => m.CartPage),
+    title: 'Warenkorb – Chnorrlimorrli',
+  },
   { path: 'products', redirectTo: 'shop' },
   { path: 'products/:legacyPath', redirectTo: 'shop' },
   {
