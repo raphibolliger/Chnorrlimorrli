@@ -53,3 +53,6 @@ supabase/.branches
 # Local secrets
 .env
 .env.*
+
+# Deno
+/deno.lock

@@ -42,6 +42,12 @@ jobs:
       - name: Apply migrations
         if: steps.credentials.outputs.ready == 'true'
         run: supabase db push
+      - name: Configure auth (login code mails over ACS SMTP)
+        if: steps.credentials.outputs.ready == 'true'
+        env:
+          SITE_URL: ${{ vars.SITE_URL || 'https://raphibolliger.github.io/Chnorrlimorrli' }}
+          SUPABASE_SMTP_PASSWORD: ${{ secrets.SUPABASE_SMTP_PASSWORD }}
+        run: supabase/scripts/configure-auth.sh
       - name: Upload seed product images
         if: steps.credentials.outputs.ready == 'true'
         run: |
@@ -57,7 +63,7 @@ jobs:
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           ACS_CONNECTION_STRING: ${{ secrets.ACS_CONNECTION_STRING }}
           MAIL_FROM: ${{ vars.MAIL_FROM || 'noreply@chnorrlimorrli.ch' }}
-          MAIL_REPLY_TO: ${{ vars.MAIL_REPLY_TO || 'hoi@chnorrlimorrli.ch' }}
+          MAIL_REPLY_TO: ${{ vars.MAIL_REPLY_TO }}
           MAIL_REDIRECT_TO: ${{ vars.MAIL_REDIRECT_TO }}
           ADMIN_NOTIFICATION_TO: ${{ vars.ADMIN_NOTIFICATION_TO }}
           SITE_URL: ${{ vars.SITE_URL || 'https://raphibolliger.github.io/Chnorrlimorrli' }}
