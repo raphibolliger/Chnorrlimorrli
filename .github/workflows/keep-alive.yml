@@ -1,0 +1,23 @@
+name: Keep Supabase active
+
+on:
+  schedule:
+    - cron: '17 5 */2 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ vars.SUPABASE_URL || 'https://lisritbuqnjhdsguzrnu.supabase.co' }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Query the database through the Data API
+        run: |
+          if [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "SUPABASE_PUBLISHABLE_KEY is not set, ping skipped." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          curl --fail --silent --show-error \
+            "$SUPABASE_URL/rest/v1/shipping_methods?select=id&limit=1" \
+            -H "apikey: $SUPABASE_PUBLISHABLE_KEY" > /dev/null
