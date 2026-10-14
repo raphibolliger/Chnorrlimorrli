@@ -29,6 +29,8 @@ Content is German (Swiss tone, never use ß, always ss).
 - Every table in `public` has RLS. Catalogue and shipping tables are publicly readable when active, writable only for admins (`public.is_admin()`, backed by the private schema `app`). Orders are never publicly readable; edge functions write them with the service role through the security-definer functions in `20261015000200_order_functions.sql`.
 - Admin users and `app.admins` rows are created directly in Supabase, never in the repository.
 - The initial catalogue and shipping methods from Ecwid are a data migration (`20261015000400_catalogue_from_ecwid.sql`). Their product images live in `supabase/seed/product-images/` and are uploaded to the `product-images` bucket under `seed/` by `supabase/scripts/upload-seed-images.sh` (locally after `npx supabase db reset`, remotely by the deploy workflow).
+- Mail: `supabase/functions/_shared/mail.ts` sends through the Azure Communication Services REST API (HMAC-signed). `MAIL_REDIRECT_TO` redirects every mail and puts the original recipient into the subject; it must stay set to `developer@chnorrlimorrli.ch` until go-live. Templates live in `supabase/functions/_shared/mail-templates.ts`. `npx deno run --allow-env --allow-net supabase/scripts/send-test-mails.ts developer@chnorrlimorrli.ch` sends every template (needs `ACS_CONNECTION_STRING`).
+- Login code mails of Supabase Auth go through the ACS SMTP relay (`supabase-auth@chnorrlimorrli.ch`, Entra app «Chnorrlimorrli SMTP»). `supabase/scripts/configure-auth.sh` applies SMTP, the German template `supabase/templates/login-code.html` and the auth settings to the project; the deploy workflow runs it.
 - Local development: `npx supabase start` (Docker) runs the full stack on :54321, Mailpit on :54324. `npm start` uses the local stack (`environment.development.ts`).
 
 ## Commands
@@ -44,5 +46,5 @@ Content is German (Swiss tone, never use ß, always ss).
 
 - `.github/workflows/deploy-pages.yml` builds and publishes to GitHub Pages on every push to `main`. Repository variables: `BASE_HREF` (default `/Chnorrlimorrli/`), `SITE_NOINDEX` (default `true`).
 - Staging: https://raphibolliger.github.io/Chnorrlimorrli/
-- `.github/workflows/supabase.yml` applies migrations, sets function secrets and deploys edge functions on pushes to `main` that touch `supabase/`. Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `ACS_CONNECTION_STRING`. Variables: `MAIL_REDIRECT_TO`, `ADMIN_NOTIFICATION_TO`, `SITE_URL`, `ALLOWED_ORIGINS`.
+- `.github/workflows/supabase.yml` applies migrations, sets function secrets and deploys edge functions on pushes to `main` that touch `supabase/`. Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_SMTP_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `ACS_CONNECTION_STRING`. Variables: `MAIL_REDIRECT_TO`, `MAIL_REPLY_TO`, `ADMIN_NOTIFICATION_TO`, `SITE_URL`, `ALLOWED_ORIGINS`.
 - `.github/workflows/keep-alive.yml` queries the Data API every two days so the free project is not paused.

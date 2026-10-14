@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de-CH">
+  <body
+    style="
+      margin: 0;
+      background: #fffaf0;
+      font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1d1d1f;
+    "
+  >
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="background: #fffaf0"
+    >
+      <tr>
+        <td align="center" style="padding: 24px 12px">
+          <table
+            role="presentation"
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            style="max-width: 480px; background: #ffffff; border-radius: 16px; overflow: hidden"
+          >
+            <tr>
+              <td
+                style="
+                  background: #e7c003;
+                  padding: 20px 24px;
+                  font-size: 22px;
+                  font-weight: 700;
+                  color: #1f2a5c;
+                "
+              >
+                Chnorrlimorrli Verwaltung
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 24px; font-size: 16px; line-height: 1.5">
+                <p style="margin: 0 0 16px">Hoi</p>
+                <p style="margin: 0 0 16px">
+                  Dein Code für die Anmeldung in der Verwaltung lautet:
+                </p>
+                <p
+                  style="
+                    margin: 0 0 16px;
+                    font-size: 32px;
+                    font-weight: 700;
+                    letter-spacing: 6px;
+                    color: #1f2a5c;
+                  "
+                >
+                  {{ .Token }}
+                </p>
+                <p style="margin: 0; color: #6b6b6b; font-size: 14px">
+                  Der Code ist 10 Minuten gültig. Falls du dich nicht anmelden wolltest, kannst du
+                  diese E-Mail ignorieren.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

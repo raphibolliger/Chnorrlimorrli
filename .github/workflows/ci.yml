@@ -31,3 +31,14 @@ jobs:
         run: |
           supabase gen types typescript --local > src/types/database.types.ts
           git diff --exit-code src/types/database.types.ts
+
+  functions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check and test edge functions
+        working-directory: supabase/functions
+        run: deno test --allow-env
