@@ -19,6 +19,11 @@ export const adminRoutes: Routes = [
         title: 'Bestellungen – Chnorrlimorrli Verwaltung',
       },
       {
+        path: 'bestellungen/:id',
+        loadComponent: () => import('./order-detail').then((m) => m.AdminOrderDetail),
+        title: 'Bestellung – Chnorrlimorrli Verwaltung',
+      },
+      {
         path: 'produkte',
         loadComponent: () => import('./products').then((m) => m.AdminProducts),
         title: 'Produkte – Chnorrlimorrli Verwaltung',
