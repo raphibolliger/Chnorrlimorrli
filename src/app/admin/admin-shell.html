@@ -1,0 +1,35 @@
+<div class="min-h-dvh bg-cream">
+  <header class="sticky top-0 z-40 bg-navy text-white shadow">
+    <div class="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
+      <a routerLink="/admin" class="font-display text-lg font-semibold">
+        Chnorrlimorrli <span class="font-normal text-mais">Verwaltung</span>
+      </a>
+      <div class="flex items-center gap-2">
+        <a routerLink="/" class="hidden text-sm text-white/70 hover:text-white sm:inline"
+          >Zur Webseite</a
+        >
+        <button
+          type="button"
+          (click)="signOut()"
+          class="rounded-full px-3 py-1.5 text-sm font-semibold ring-1 ring-white/30 hover:bg-white/10"
+        >
+          Abmelden
+        </button>
+      </div>
+    </div>
+    <nav class="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-2 pb-2" aria-label="Verwaltung">
+      @for (item of navigation; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="bg-white text-navy"
+          class="shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold text-white/85 hover:bg-white/10"
+          >{{ item.label }}</a
+        >
+      }
+    </nav>
+  </header>
+  <main class="mx-auto max-w-5xl px-4 py-6">
+    <router-outlet />
+  </main>
+  <p class="pb-6 text-center text-xs text-ink/50">Angemeldet als {{ auth.email() }}</p>
+</div>
