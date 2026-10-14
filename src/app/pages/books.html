@@ -1,0 +1,94 @@
+<app-page-intro
+  eyebrow="Die Bücher"
+  title="Wer und was isch de Chnorrlimorrli?"
+  [lead]="texts.whoIsChnorrlimorrliLead"
+/>
+
+<section class="bg-cream">
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-[1fr_minmax(0,360px)]">
+    <div class="space-y-4 text-lg leading-relaxed">
+      @for (paragraph of texts.whoIsChnorrlimorrli; track $index) {
+        <p>{{ paragraph }}</p>
+      }
+    </div>
+    <app-site-image
+      name="buecher/chnorrlimorrli-und-freunde"
+      alt="Chnorrlimorrli mit seinen Freunden"
+      sizes="(min-width: 768px) 360px, 90vw"
+      imageClass="mx-auto h-auto w-full max-w-sm"
+    />
+  </div>
+</section>
+
+<section class="bg-white">
+  <div class="mx-auto max-w-6xl px-4 py-16">
+    <h2 class="text-3xl font-bold text-navy sm:text-4xl">Zwei Bücher, viele Abenteuer</h2>
+    <div class="mt-10 grid gap-8 md:grid-cols-2">
+      @for (book of books; track book.image) {
+        <article
+          class="flex flex-col gap-6 rounded-3xl bg-parchment p-6 shadow-sm ring-1 ring-ink/5 sm:flex-row"
+        >
+          <app-site-image
+            [name]="book.image"
+            [alt]="book.alt"
+            sizes="180px"
+            imageClass="mx-auto h-auto w-40 shrink-0 rounded-md shadow-xl sm:mx-0 sm:w-44"
+          />
+          <div class="flex flex-col">
+            <p class="text-sm font-semibold text-bark">{{ book.subtitle }}</p>
+            <h3 class="mt-1 text-2xl font-semibold text-navy">{{ book.title }}</h3>
+            <p class="mt-3 leading-relaxed text-ink/80">{{ book.text }}</p>
+            <a
+              routerLink="/shop"
+              class="mt-5 self-start rounded-full bg-navy px-5 py-2.5 font-semibold text-white transition hover:bg-navy-800"
+              >Im Shop bestellen</a
+            >
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="bg-mais-50">
+  <div class="mx-auto max-w-6xl px-4 py-16">
+    <h2 class="text-3xl font-bold text-navy sm:text-4xl">Sinn und Zweck</h2>
+    <div class="mt-4 max-w-3xl space-y-4 text-lg leading-relaxed">
+      @for (paragraph of texts.purpose.intro; track $index) {
+        <p>{{ paragraph }}</p>
+      }
+    </div>
+    <div class="mt-10 grid gap-6 md:grid-cols-3">
+      @for (section of texts.purpose.sections; track section.title) {
+        <article class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
+          <h3 class="text-xl font-semibold text-navy">{{ section.title }}</h3>
+          <p class="mt-3 leading-relaxed text-ink/80">{{ section.text }}</p>
+        </article>
+      }
+    </div>
+    <div class="mt-10 max-w-3xl space-y-4 leading-relaxed">
+      @for (paragraph of texts.purpose.outro; track $index) {
+        <p>{{ paragraph }}</p>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="bg-navy text-white">
+  <div
+    class="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-12 md:flex-row md:items-center md:justify-between"
+  >
+    <div>
+      <h2 class="text-2xl font-bold sm:text-3xl">Freiämter Mundartwörter</h2>
+      <p class="mt-2 text-white/80">
+        Alle Wörter aus dem Buch zum Nachschlagen: die Wörtliliste zum Herunterladen.
+      </p>
+    </div>
+    <a
+      [href]="wordList.file"
+      download
+      class="rounded-full bg-mais px-6 py-3 font-semibold text-navy transition hover:bg-mais-100"
+      >Wörtliliste herunterladen</a
+    >
+  </div>
+</section>

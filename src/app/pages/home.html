@@ -1,6 +1,143 @@
-<section class="bg-mais">
+<section class="relative overflow-hidden bg-mais">
+  <div
+    class="mx-auto grid max-w-6xl items-center gap-6 px-4 pt-8 pb-0 sm:pt-12 md:grid-cols-2 md:pb-12"
+  >
+    <div class="order-2 pb-12 md:order-1 md:pb-0">
+      <p class="text-sm font-semibold tracking-wide text-navy/70 uppercase">
+        Das Freiämter Kinderbuch
+      </p>
+      <h1 class="mt-2 text-5xl leading-[1.05] font-bold text-navy sm:text-6xl">
+        Hoi. Schön bisch do.
+      </h1>
+      <p class="mt-4 font-display text-2xl font-medium text-navy">{{ texts.heroLead }}</p>
+      <p class="mt-4 max-w-md text-lg leading-relaxed text-navy/85">
+        Halb Mensch, halb Monster und zu 100 Prozent ein Freiämter.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a
+          routerLink="/shop"
+          class="rounded-full bg-navy px-6 py-3 font-semibold text-white shadow-lg shadow-navy/20 transition hover:bg-navy-800"
+          >Buch bestellen</a
+        >
+        <a
+          routerLink="/buecher"
+          class="rounded-full bg-white/70 px-6 py-3 font-semibold text-navy ring-1 ring-navy/20 transition hover:bg-white"
+          >Mehr über die Bücher</a
+        >
+      </div>
+    </div>
+    <div class="order-1 flex justify-center md:order-2">
+      <app-site-image
+        name="home/chnorrlimorrli"
+        alt="Chnorrlimorrli mit gestreiftem Pulli und wilden Haaren"
+        sizes="(min-width: 768px) 420px, 56vw"
+        [priority]="true"
+        imageClass="h-auto w-[56vw] max-w-[420px] drop-shadow-xl md:w-[70vw]"
+      />
+    </div>
+  </div>
+</section>
+
+<section class="bg-navy text-white">
+  <div
+    class="mx-auto grid max-w-6xl items-center gap-8 px-4 py-14 md:grid-cols-[minmax(0,240px)_1fr] md:gap-12"
+  >
+    <app-site-image
+      name="buecher/buch-2"
+      alt="Buchcover «Chnorrlimorrli und die Könige des Freiamts»"
+      sizes="240px"
+      imageClass="mx-auto h-auto w-48 rotate-[-3deg] rounded-lg shadow-2xl md:w-60"
+    />
+    <div>
+      <p class="font-display text-lg font-medium text-mais">Es ist da!</p>
+      <h2 class="mt-1 text-3xl font-bold sm:text-4xl">
+        Chnorrlimorrli und die Könige des Freiamts
+      </h2>
+      <p class="mt-4 max-w-2xl leading-relaxed text-white/85">
+        Das zweite Chnorrlimorrli-Buch erschien im Dezember 2024. Neue Abenteuer an zehn Orten im
+        Freiamt, mit vielen Mundartausdrücken und den Zeichnungen von Esther «Etschgi» Sorg.
+      </p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a
+          routerLink="/shop"
+          class="rounded-full bg-mais px-6 py-3 font-semibold text-navy transition hover:bg-mais-100"
+          >Jetzt bestellen</a
+        >
+        <a
+          routerLink="/buecher"
+          class="rounded-full px-6 py-3 font-semibold text-white ring-1 ring-white/30 hover:bg-white/10"
+          >Beide Bücher ansehen</a
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-cream">
+  <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2">
+    <div>
+      <h2 class="text-3xl font-bold text-navy sm:text-4xl">Wer und was isch de Chnorrlimorrli?</h2>
+      <p class="mt-4 text-lg leading-relaxed">{{ texts.whoIsChnorrlimorrliLead }}</p>
+      <a
+        routerLink="/buecher"
+        class="mt-6 inline-flex items-center gap-2 font-semibold text-navy hover:underline"
+        >Mehr über die Bücher <span aria-hidden="true">→</span></a
+      >
+    </div>
+    <app-site-image
+      name="buecher/chnorrlimorrli-und-freunde"
+      alt="Chnorrlimorrli mit seinen Freunden"
+      sizes="(min-width: 768px) 40vw, 90vw"
+      imageClass="mx-auto h-auto w-full max-w-sm"
+    />
+  </div>
+</section>
+
+<section class="bg-white">
   <div class="mx-auto max-w-6xl px-4 py-16">
-    <h1 class="font-display text-4xl font-bold text-ink">Hoi. Schön bisch do.</h1>
-    <p class="mt-4 max-w-prose text-lg text-ink/80">De Chnorrlimorrli isch zrugg!</p>
+    <h2 class="text-3xl font-bold text-navy sm:text-4xl">Mit Chnorrlimorrli unterwegs</h2>
+    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      @for (teaser of teasers; track teaser.path) {
+        <a
+          [routerLink]="teaser.path"
+          class="group flex flex-col overflow-hidden rounded-3xl bg-parchment shadow-sm ring-1 ring-ink/5 transition hover:-translate-y-1 hover:shadow-lg"
+        >
+          <div class="relative aspect-[4/3] overflow-hidden bg-mais-100">
+            <app-site-image
+              [name]="teaser.image"
+              [alt]="teaser.title"
+              [fill]="true"
+              sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 90vw"
+              imageClass="object-cover transition group-hover:scale-105"
+            />
+          </div>
+          <div class="flex flex-1 flex-col p-6">
+            <h3 class="text-xl font-semibold text-navy">{{ teaser.title }}</h3>
+            <p class="mt-2 text-ink/75">{{ teaser.text }}</p>
+            <span class="mt-4 font-semibold text-navy group-hover:underline">Entdecken →</span>
+          </div>
+        </a>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="bg-mais-50">
+  <div class="mx-auto grid max-w-6xl gap-8 px-4 py-16 md:grid-cols-2">
+    <div>
+      <h2 class="text-3xl font-bold text-navy">Verkaufsorte</h2>
+      <p class="mt-4 leading-relaxed">{{ texts.salesPoints.intro }}</p>
+    </div>
+    <div>
+      <ul class="grid gap-2">
+        @for (place of texts.salesPoints.places; track place) {
+          <li class="flex items-start gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm">
+            <span class="mt-1.5 size-2.5 shrink-0 rounded-full bg-mais" aria-hidden="true"></span>
+            <span>{{ place }}</span>
+          </li>
+        }
+      </ul>
+      <p class="mt-6 leading-relaxed">{{ texts.salesPoints.outro }}</p>
+    </div>
   </div>
 </section>

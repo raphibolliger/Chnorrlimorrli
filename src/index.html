@@ -2,17 +2,31 @@
 <html lang="de-CH">
   <head>
     <meta charset="utf-8" />
-    <title>Chnorrlimorrli</title>
+    <title>Chnorrlimorrli – das Freiämter Kinderbuch</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Chnorrlimorrli – das Freiämter Kinderbuch. Halb Mensch, halb Monster und zu 100 Prozent ein Freiämter."
+      content="Halb Mensch, halb Monster und zu 100 Prozent ein Freiämter. Das Freiämter Kinderbuch Chnorrlimorrli."
     />
     <meta name="theme-color" content="#e7c003" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Chnorrlimorrli" />
+    <meta property="og:locale" content="de_CH" />
+    <meta property="og:image" content="https://chnorrlimorrli.ch/images/og-image.jpg" />
+    <link rel="icon" type="image/png" href="images/logo-96.webp" />
+    <link rel="apple-touch-icon" href="images/logo-192.webp" />
+    <script>
+      if (/^(www\.)?chnorrlimorrli\.ch$/.test(location.hostname)) {
+        const plausible = document.createElement('script');
+        plausible.defer = true;
+        plausible.dataset.domain = 'chnorrlimorrli.ch';
+        plausible.src = 'https://plausible.io/js/script.js';
+        document.head.appendChild(plausible);
+      }
+    </script>
   </head>
-  <body class="bg-white text-ink antialiased">
+  <body class="bg-cream font-sans text-ink antialiased">
     <app-root></app-root>
   </body>
 </html>

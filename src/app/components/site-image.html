@@ -1,0 +1,22 @@
+@if (fill()) {
+  <img
+    [ngSrc]="name()"
+    [ngSrcset]="srcset()"
+    [sizes]="sizes()"
+    fill
+    [alt]="alt()"
+    [priority]="priority()"
+    [class]="imageClass()"
+  />
+} @else {
+  <img
+    [ngSrc]="name()"
+    [ngSrcset]="srcset()"
+    [sizes]="sizes()"
+    [width]="image().width"
+    [height]="image().height"
+    [alt]="alt()"
+    [priority]="priority()"
+    [class]="imageClass()"
+  />
+}

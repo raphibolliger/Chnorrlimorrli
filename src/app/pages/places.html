@@ -1,0 +1,93 @@
+<app-page-intro
+  eyebrow="Ausflüge im Freiamt"
+  title="Die Orte erleben"
+  lead="Erst im Buch lesen, dann live besuchen: Chnorrlimorrli erlebt seine Abenteuer an 17 echten Orten im Freiamt und rundherum."
+>
+  <nav class="mt-6 flex flex-wrap gap-2" aria-label="Orte nach Buch">
+    @for (book of books; track book.id) {
+      <a
+        [href]="'#' + book.id"
+        class="rounded-full bg-white/70 px-4 py-2 text-sm font-semibold text-navy ring-1 ring-navy/20 hover:bg-white"
+        >{{ book.title }}</a
+      >
+    }
+  </nav>
+</app-page-intro>
+
+<section class="bg-cream">
+  <div
+    class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 md:grid-cols-[minmax(0,380px)_1fr]"
+  >
+    <app-site-image
+      name="orte/karte"
+      alt="Handgezeichnete Karte des Freiamts mit den Schauplätzen aus dem ersten Buch"
+      sizes="(min-width: 768px) 380px, 90vw"
+      imageClass="mx-auto h-auto w-full max-w-sm rounded-2xl shadow-lg"
+    />
+    <div class="space-y-4 text-lg leading-relaxed">
+      <p>
+        Die Schauplätze in der Geschichte haben alle ihren ganz eigenen Charme und ihre Historie.
+        Die Kinder können diese Orte aktiv und gemeinsam mit den Eltern selber erkunden. Tolle
+        Ausflüge im Freiamt sind garantiert.
+      </p>
+      <p class="rounded-2xl bg-mais-100 px-5 py-4 text-base">
+        Es gilt, der Natur und der Umwelt an allen Orten (und sowieso immer) Sorge zu tragen.
+      </p>
+    </div>
+  </div>
+</section>
+
+@for (book of books; track book.id) {
+  <section [id]="book.id" class="odd:bg-white even:bg-parchment/60">
+    <div class="mx-auto max-w-6xl px-4 py-16">
+      <h2 class="text-3xl font-bold text-navy sm:text-4xl">{{ book.title }}</h2>
+      <div class="mt-3 max-w-3xl space-y-3 text-lg leading-relaxed text-ink/80">
+        @for (paragraph of book.intro; track $index) {
+          <p>{{ paragraph }}</p>
+        }
+      </div>
+      <div class="mt-10 grid gap-8">
+        @for (place of book.places; track place.slug; let index = $index) {
+          <article
+            [id]="place.slug"
+            class="grid items-start gap-6 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-ink/5 md:grid-cols-2"
+          >
+            <div
+              [class]="
+                index % 2 === 1
+                  ? 'relative h-64 bg-mais-100 md:order-2 md:h-full md:min-h-80'
+                  : 'relative h-64 bg-mais-100 md:h-full md:min-h-80'
+              "
+            >
+              <app-site-image
+                [name]="place.image"
+                [alt]="place.name"
+                [fill]="true"
+                sizes="(min-width: 768px) 560px, 100vw"
+                imageClass="object-cover"
+              />
+            </div>
+            <div class="px-6 pb-6 md:py-8 md:pr-8">
+              <p class="text-sm font-semibold text-bark">Ort {{ index + 1 }}</p>
+              <h3 class="mt-1 text-2xl font-semibold text-navy">{{ place.name }}</h3>
+              <div class="mt-3 space-y-3 leading-relaxed text-ink/80">
+                @for (paragraph of place.paragraphs; track $index) {
+                  <p>{{ paragraph }}</p>
+                }
+              </div>
+              @if (place.link) {
+                <a
+                  [href]="place.link.url"
+                  target="_blank"
+                  rel="noopener"
+                  class="mt-5 inline-flex items-center gap-2 font-semibold text-navy hover:underline"
+                  >{{ place.link.label }} <span aria-hidden="true">↗</span></a
+                >
+              }
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+}
