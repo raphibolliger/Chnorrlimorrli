@@ -1,0 +1,103 @@
+<header class="sticky top-0 z-40 border-b border-ink/10 bg-cream/95 backdrop-blur">
+  <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+    <a
+      routerLink="/"
+      (click)="closeMenu()"
+      class="flex items-center gap-2"
+      aria-label="Zur Startseite"
+    >
+      <app-site-image name="logo" alt="" sizes="44px" imageClass="size-11 rounded-full" />
+      <span class="font-display text-xl font-semibold tracking-tight text-navy"
+        >Chnorrlimorrli</span
+      >
+    </a>
+
+    <nav class="hidden items-center gap-1 lg:flex" aria-label="Hauptnavigation">
+      @for (item of navigation; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="bg-mais-100 text-navy"
+          class="rounded-full px-3 py-2 text-sm font-medium text-ink/80 transition hover:bg-mais-100 hover:text-navy"
+          >{{ item.label }}</a
+        >
+      }
+      <a
+        routerLink="/shop"
+        routerLinkActive="ring-2 ring-navy"
+        class="ml-2 rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white transition hover:bg-navy-800"
+        >Shop</a
+      >
+    </nav>
+
+    <div class="flex items-center gap-2 lg:hidden">
+      <a
+        routerLink="/shop"
+        (click)="closeMenu()"
+        class="rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white"
+        >Shop</a
+      >
+      <button
+        type="button"
+        (click)="toggleMenu()"
+        class="inline-flex size-11 items-center justify-center rounded-full text-navy hover:bg-mais-100"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="mobile-menu"
+        [attr.aria-label]="menuOpen() ? 'Menü schliessen' : 'Menü öffnen'"
+      >
+        @if (menuOpen()) {
+          <svg
+            viewBox="0 0 24 24"
+            class="size-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        } @else {
+          <svg
+            viewBox="0 0 24 24"
+            class="size-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (menuOpen()) {
+    <nav
+      id="mobile-menu"
+      class="border-t border-ink/10 bg-cream lg:hidden"
+      aria-label="Hauptnavigation"
+    >
+      <ul class="mx-auto flex max-w-6xl flex-col px-4 py-3">
+        <li>
+          <a
+            routerLink="/"
+            (click)="closeMenu()"
+            class="block rounded-xl px-3 py-3 font-medium hover:bg-mais-100"
+            >Startseite</a
+          >
+        </li>
+        @for (item of navigation; track item.path) {
+          <li>
+            <a
+              [routerLink]="item.path"
+              (click)="closeMenu()"
+              routerLinkActive="bg-mais-100 text-navy"
+              class="block rounded-xl px-3 py-3 font-medium hover:bg-mais-100"
+              >{{ item.label }}</a
+            >
+          </li>
+        }
+      </ul>
+    </nav>
+  }
+</header>

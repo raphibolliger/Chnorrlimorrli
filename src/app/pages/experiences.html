@@ -1,0 +1,125 @@
+<app-page-intro
+  eyebrow="Chnorrlimorrli unterwegs"
+  title="Song, Bänkli & mehr"
+  lead="Chnorrlimorrli hat einen eigenen Rap, zwei Bänkli, ein eigenes Brot und war schon auf Familienwanderung."
+>
+  <nav class="mt-6 flex flex-wrap gap-2" aria-label="Abschnitte">
+    @for (section of sections; track section.id) {
+      <a
+        [href]="'#' + section.id"
+        class="rounded-full bg-white/70 px-4 py-2 text-sm font-semibold text-navy ring-1 ring-navy/20 hover:bg-white"
+        >{{ section.label }}</a
+      >
+    }
+  </nav>
+</app-page-intro>
+
+<section id="song" class="bg-cream">
+  <div class="mx-auto grid max-w-6xl items-start gap-10 px-4 py-16 lg:grid-cols-2">
+    <div>
+      <h2 class="text-3xl font-bold text-navy sm:text-4xl">De Chnorrlimorrli-Song</h2>
+      <div class="mt-4 space-y-3 leading-relaxed text-ink/80">
+        @for (paragraph of texts.song; track $index) {
+          <p>{{ paragraph }}</p>
+        }
+      </div>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a
+          [href]="songText.file"
+          download
+          class="rounded-full bg-navy px-5 py-2.5 font-semibold text-white transition hover:bg-navy-800"
+          >Songtext herunterladen</a
+        >
+        <a
+          href="https://www.youtube.com/@Buenzi"
+          target="_blank"
+          rel="noopener"
+          class="rounded-full px-5 py-2.5 font-semibold text-navy ring-1 ring-navy/30 hover:bg-white"
+          >Oberstufe Bünzmatt ↗</a
+        >
+      </div>
+    </div>
+    <app-youtube-embed videoId="q0XWOrtkVVY" title="Chnorrlimorrli präsentiert Brazzo" />
+  </div>
+</section>
+
+<section id="baenkli" class="bg-white">
+  <div class="mx-auto max-w-6xl px-4 py-16">
+    <h2 class="text-3xl font-bold text-navy sm:text-4xl">Bänkli</h2>
+    <div class="mt-10 grid gap-8 md:grid-cols-2">
+      @for (bench of benches; track bench.title) {
+        <article class="overflow-hidden rounded-3xl bg-parchment shadow-sm ring-1 ring-ink/5">
+          <div class="relative h-64">
+            <app-site-image
+              [name]="bench.image"
+              [alt]="bench.alt"
+              [fill]="true"
+              sizes="(min-width: 768px) 560px, 100vw"
+              imageClass="object-cover"
+            />
+          </div>
+          <div class="p-6">
+            <h3 class="text-2xl font-semibold text-navy">{{ bench.title }}</h3>
+            <div class="mt-3 space-y-3 leading-relaxed text-ink/80">
+              @for (paragraph of bench.paragraphs; track $index) {
+                <p>{{ paragraph }}</p>
+              }
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section id="brot" class="bg-mais-50">
+  <div
+    class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-[minmax(0,320px)_1fr]"
+  >
+    <app-site-image
+      name="erleben/brot"
+      alt="Chnorrlimorrli-Brot der Bäckerei Kreyenbühl"
+      sizes="(min-width: 768px) 320px, 80vw"
+      imageClass="mx-auto h-auto w-full max-w-xs rounded-3xl shadow-lg"
+    />
+    <div>
+      <h2 class="text-3xl font-bold text-navy sm:text-4xl">Das Chnorrlimorrli-Brot</h2>
+      <div class="mt-4 space-y-3 leading-relaxed text-ink/80">
+        @for (paragraph of texts.bread; track $index) {
+          <p>{{ paragraph }}</p>
+        }
+      </div>
+      <a
+        href="https://www.genuss-handwerk.ch"
+        target="_blank"
+        rel="noopener"
+        class="mt-5 inline-block font-semibold text-navy hover:underline"
+        >www.genuss-handwerk.ch ↗</a
+      >
+    </div>
+  </div>
+</section>
+
+<section id="wanderung" class="bg-white">
+  <div class="mx-auto max-w-3xl px-4 py-16">
+    <p class="text-sm font-semibold text-bark">Wanderung mit Chnorrlimorrli</p>
+    <h2 class="mt-1 text-3xl font-bold text-navy sm:text-4xl">{{ texts.hike.title }}</h2>
+    <p class="mt-2 font-display text-xl text-navy/80">{{ texts.hike.subtitle }}</p>
+    <app-site-image
+      name="erleben/wanderung"
+      alt="Eindrücke von der Familienwanderung in Bremgarten"
+      sizes="(min-width: 768px) 720px, 100vw"
+      imageClass="mt-8 h-auto w-full rounded-3xl shadow-md"
+    />
+    <p class="mt-8 text-lg leading-relaxed font-medium">{{ texts.hike.lead }}</p>
+    <div class="mt-6 space-y-4 leading-relaxed text-ink/85">
+      @for (block of texts.hike.blocks; track $index) {
+        @if (block.heading) {
+          <h3 class="pt-4 text-xl font-semibold text-navy">{{ block.heading }}</h3>
+        } @else {
+          <p>{{ block.text }}</p>
+        }
+      }
+    </div>
+  </div>
+</section>

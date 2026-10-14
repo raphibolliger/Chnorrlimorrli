@@ -1,11 +1,16 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { SiteFooter } from './components/site-footer';
+import { SiteHeader } from './components/site-header';
+import { PageMeta } from './core/page-meta';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, SiteHeader, SiteFooter],
   templateUrl: './app.html',
 })
 export class App {
-  protected readonly year = new Date().getFullYear();
+  constructor() {
+    inject(PageMeta).start();
+  }
 }

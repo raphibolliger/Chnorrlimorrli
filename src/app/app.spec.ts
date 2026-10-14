@@ -10,10 +10,11 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  it('renders the brand link', async () => {
+  it('renders header with brand and footer with contact', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
-    const brand = (fixture.nativeElement as HTMLElement).querySelector('header a');
-    expect(brand?.textContent).toContain('Chnorrlimorrli');
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('header')?.textContent).toContain('Chnorrlimorrli');
+    expect(element.querySelector('footer')?.textContent).toContain('hoi@chnorrlimorrli.ch');
   });
 });
