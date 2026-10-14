@@ -1,2 +1,62 @@
-<h1 class="text-2xl font-bold text-navy">Produkte</h1>
-<p class="mt-2 text-ink/70">Folgt.</p>
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-2xl font-bold text-navy">Produkte</h1>
+  <a
+    routerLink="/admin/produkte/neu"
+    class="rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white"
+    >Neues Produkt</a
+  >
+</div>
+
+@if (products.isLoading() && !products.hasValue()) {
+  <div class="mt-4 space-y-3" aria-hidden="true">
+    @for (placeholder of [1, 2, 3]; track placeholder) {
+      <div class="h-24 animate-pulse rounded-2xl bg-white/70"></div>
+    }
+  </div>
+} @else if (products.error()) {
+  <p class="mt-4 rounded-2xl bg-red-50 p-4 text-red-800">
+    Die Produkte konnten nicht geladen werden.
+  </p>
+} @else {
+  <ul class="mt-4 space-y-3">
+    @for (product of products.value(); track product.id) {
+      <li class="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-ink/5">
+        <a
+          [routerLink]="['/admin/produkte', product.id]"
+          class="relative size-16 shrink-0 overflow-hidden rounded-xl bg-parchment"
+        >
+          @if (product.product_images[0]; as image) {
+            <app-product-image
+              [path]="image.storage_path"
+              [alt]="product.name"
+              imageClass="object-contain p-1"
+            />
+          }
+        </a>
+        <a [routerLink]="['/admin/produkte', product.id]" class="min-w-0 flex-1">
+          <p class="truncate font-semibold text-navy">{{ product.name }}</p>
+          <p class="text-sm text-ink/60">
+            {{ product.price_rappen | chf }}
+            @if (product.track_stock) {
+              · Lager {{ product.stock }}
+            }
+            @if (product.sku) {
+              · {{ product.sku }}
+            }
+          </p>
+        </a>
+        <button
+          type="button"
+          (click)="toggleActive(product)"
+          class="shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold"
+          [class]="product.active ? 'bg-green-100 text-green-800' : 'bg-ink/10 text-ink/60'"
+          [attr.aria-label]="(product.active ? 'Deaktivieren: ' : 'Aktivieren: ') + product.name"
+        >
+          {{ product.active ? 'Aktiv' : 'Inaktiv' }}
+        </button>
+      </li>
+    } @empty {
+      <li class="rounded-2xl bg-white p-6 text-center text-ink/60">Noch keine Produkte.</li>
+    }
+  </ul>
+}
