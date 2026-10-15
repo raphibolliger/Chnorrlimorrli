@@ -109,6 +109,12 @@
           order.phone
         }}</a>
       }
+      @if (orderPageUrl(); as url) {
+        <a [href]="url" target="_blank" rel="noopener" class="admin-button-text mt-2 -ml-2">
+          <app-icon name="website" [size]="16" />
+          Bestellseite der Kundin oder des Kunden
+        </a>
+      }
     </app-section-card>
 
     <app-section-card [title]="order.shipping_name" icon="shipping">

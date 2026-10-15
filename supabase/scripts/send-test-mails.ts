@@ -51,6 +51,7 @@ const postalOrder: OrderMail = {
   pickupLocation: null,
   pickupHours: null,
   trackingNumber: '99.00.123456.12345678',
+  orderUrl: `${siteUrl}/bestellung?code=00000000-0000-4000-8000-000000000000`,
 };
 const pickupOrder: OrderMail = {
   ...postalOrder,

@@ -40,6 +40,7 @@ const order: OrderMail = {
   pickupLocation: null,
   pickupHours: null,
   trackingNumber: '99.00.123456.12345678',
+  orderUrl: 'https://example.com/bestellung?code=00000000-0000-4000-8000-000000000000',
 };
 
 Deno.test('parses ACS connection strings', () => {
@@ -133,4 +134,19 @@ Deno.test('links keep their target in text mails', () => {
     mail.text,
     'post.ch (https://service.post.ch/ekp-web/ui/entry/search/99.00.123456.12345678)',
   );
+});
+
+Deno.test('customer mails link to the order page, the admin mail does not', () => {
+  const orderUrl = 'https://example.com/bestellung?code=00000000-0000-4000-8000-000000000000';
+  for (const mail of [
+    orderConfirmation(order, 'https://example.com'),
+    orderShipped(order, 'https://example.com'),
+    orderReadyForPickup(order, 'https://example.com'),
+    orderDelivered(order, 'https://example.com'),
+    orderCancelled(order, 'https://example.com'),
+  ]) {
+    assertStringIncludes(mail.html, `href="${orderUrl}"`);
+    assertStringIncludes(mail.text, `Bestellung ansehen (${orderUrl})`);
+  }
+  assert(!adminNewOrder(order, 'https://example.com').text.includes(orderUrl));
 });

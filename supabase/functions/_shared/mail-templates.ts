@@ -1,4 +1,11 @@
-import { optionsText, paymentMethodLabel, ProductOptions, ShippingKind } from './orders.ts';
+import {
+  optionsText,
+  paymentMethodLabel,
+  pickupPlace,
+  ProductOptions,
+  ShippingKind,
+  trackingUrl,
+} from './orders.ts';
 import { formatChf, formatShippingPrice } from './pricing.ts';
 
 export interface OrderMailItem {
@@ -29,6 +36,7 @@ export interface OrderMail {
   pickupLocation: string | null;
   pickupHours: string | null;
   trackingNumber: string | null;
+  orderUrl: string;
 }
 
 export interface MailContent {
@@ -170,15 +178,11 @@ function render(siteUrl: string, order: OrderMail, mail: Mail): MailContent {
   };
 }
 
-function pickupPlace(order: OrderMail): string {
-  return [order.pickupLocation, order.pickupHours].filter(Boolean).join(' · ') || 'Villmergen';
-}
-
 function delivery(order: OrderMail): Block {
   if (order.shippingKind === 'pickup') {
     return paragraph(
       bold('Abholung:'),
-      ` ${pickupPlace(order)}. Wir melden uns, sobald deine Bestellung bereitliegt.`,
+      ` ${pickupPlace(order.pickupLocation, order.pickupHours)}. Wir melden uns, sobald deine Bestellung bereitliegt.`,
     );
   }
   return lines(
@@ -196,6 +200,14 @@ function customerNote(title: string, order: OrderMail): Block[] {
 
 const regards = lines('Herzliche Grüsse', 'Verein Chnorrlimorrli');
 
+function orderLink(order: OrderMail): Block {
+  return paragraph(
+    'Den aktuellen Stand deiner Bestellung siehst du jederzeit hier: ',
+    link('Bestellung ansehen', order.orderUrl),
+    '.',
+  );
+}
+
 export function orderConfirmation(order: OrderMail, siteUrl: string): MailContent {
   const paymentMethod = paymentMethodLabel(order.paymentMethod);
   return render(siteUrl, order, {
@@ -211,6 +223,7 @@ export function orderConfirmation(order: OrderMail, siteUrl: string): MailConten
       delivery(order),
       ...customerNote('Deine Bemerkung:', order),
       paragraph('Die Zahlungsquittung erhältst du separat von unserem Zahlungsanbieter Stripe.'),
+      orderLink(order),
       regards,
     ],
   });
@@ -244,7 +257,13 @@ function statusMail(
   return render(siteUrl, order, {
     subject: mail.subject,
     headline: mail.headline,
-    blocks: [paragraph(`Hoi ${order.firstName}`), ...mail.message, 'items', regards],
+    blocks: [
+      paragraph(`Hoi ${order.firstName}`),
+      ...mail.message,
+      'items',
+      orderLink(order),
+      regards,
+    ],
   });
 }
 
@@ -255,10 +274,7 @@ export function orderShipped(order: OrderMail, siteUrl: string): MailContent {
           'Deine Sendungsnummer: ',
           bold(order.trackingNumber),
           '. Du kannst die Sendung auf ',
-          link(
-            'post.ch',
-            `https://service.post.ch/ekp-web/ui/entry/search/${encodeURIComponent(order.trackingNumber)}`,
-          ),
+          link('post.ch', trackingUrl(order.trackingNumber)),
           ' verfolgen.',
         ),
       ]
@@ -280,7 +296,7 @@ export function orderReadyForPickup(order: OrderMail, siteUrl: string): MailCont
     message: [
       paragraph('Deine Bestellung ', bold(order.orderNumber), ' kann abgeholt werden.'),
       paragraph(
-        `Abholort: ${pickupPlace(order)}. Antworte einfach auf diese E-Mail, um einen Termin abzumachen.`,
+        `Abholort: ${pickupPlace(order.pickupLocation, order.pickupHours)}. Antworte einfach auf diese E-Mail, um einen Termin abzumachen.`,
       ),
     ],
   });

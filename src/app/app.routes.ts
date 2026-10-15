@@ -100,9 +100,9 @@ export const routes: Routes = [
         title: 'Kasse – Chnorrlimorrli',
       },
       {
-        path: 'bestellung/erfolg',
-        loadComponent: () => import('./pages/order-success').then((m) => m.OrderSuccess),
-        title: 'Bestellung – Chnorrlimorrli',
+        path: 'bestellung',
+        loadComponent: () => import('./pages/order-status').then((m) => m.OrderStatus),
+        title: 'Deine Bestellung – Chnorrlimorrli',
       },
       { path: 'products', redirectTo: 'shop' },
       { path: 'products/:legacyPath', redirectTo: 'shop' },

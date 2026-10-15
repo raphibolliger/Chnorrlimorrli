@@ -1,0 +1,183 @@
+<section class="bg-cream">
+  <div class="mx-auto max-w-2xl px-4 py-10 sm:py-16">
+    @switch (state()) {
+      @case ('loading') {
+        <div
+          class="h-64 animate-pulse rounded-3xl bg-white/70"
+          aria-label="Bestellung wird geladen"
+        ></div>
+      }
+      @case ('ready') {
+        @if (order(); as order) {
+          <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5 sm:p-8">
+            @if (order.payment_status === 'pending') {
+              <h1 class="text-3xl font-bold text-navy">Zahlung wird bestätigt …</h1>
+              <p class="mt-3 leading-relaxed">
+                Deine Bestellung {{ order.order_number }} ist angelegt. Sobald Stripe die Zahlung
+                bestätigt, erhältst du eine E-Mail an <strong>{{ order.email }}</strong
+                >.
+              </p>
+            } @else if (order.payment_status === 'failed' || order.payment_status === 'expired') {
+              <h1 class="text-3xl font-bold text-navy">Die Zahlung ist nicht abgeschlossen.</h1>
+              <p class="mt-3 leading-relaxed">
+                Für die Bestellung {{ order.order_number }} ist keine Zahlung eingegangen.
+                @if (justOrdered()) {
+                  Dein Warenkorb ist noch da.
+                }
+              </p>
+              @if (justOrdered()) {
+                <a
+                  routerLink="/kasse"
+                  class="mt-4 inline-block rounded-full bg-navy px-6 py-3 font-semibold text-white"
+                  >Nochmals bezahlen</a
+                >
+              }
+            } @else {
+              <p class="font-display text-lg font-medium text-bark">
+                @if (justOrdered()) {
+                  Merci vilmol!
+                } @else {
+                  Bestellung {{ order.order_number }} vom
+                  {{ order.created_at | date: 'dd.MM.yyyy' }}
+                }
+              </p>
+              <h1 class="mt-1 text-3xl font-bold text-navy">{{ headline() }}</h1>
+              <p class="mt-3 leading-relaxed">
+                @if (justOrdered()) {
+                  Hoi {{ order.first_name }}, wir haben deine Zahlung erhalten. Die Bestätigung
+                  haben wir an <strong>{{ order.email }}</strong> geschickt.
+                } @else {
+                  Hoi {{ order.first_name }}, hier siehst du jederzeit den aktuellen Stand deiner
+                  Bestellung.
+                }
+              </p>
+
+              @if (order.fulfillment_status !== 'cancelled') {
+                <ol class="mt-6 flex" aria-label="Stand der Bestellung">
+                  @for (step of progress(); track step.label; let first = $first) {
+                    <li
+                      class="relative flex flex-1 flex-col items-center gap-2 text-center"
+                      [attr.aria-current]="step.state === 'current' ? 'step' : null"
+                    >
+                      @if (!first) {
+                        <span
+                          class="absolute top-3.5 right-1/2 left-[-50%] h-0.5"
+                          [class]="step.state === 'upcoming' ? 'bg-ink/20' : 'bg-navy'"
+                          aria-hidden="true"
+                        ></span>
+                      }
+                      <span
+                        class="relative flex size-7 items-center justify-center rounded-full text-sm font-bold"
+                        [class]="
+                          step.state === 'done'
+                            ? 'bg-navy text-white'
+                            : step.state === 'current'
+                              ? 'bg-mais text-navy ring-4 ring-mais-100'
+                              : 'bg-white text-ink/40 ring-2 ring-ink/15'
+                        "
+                        aria-hidden="true"
+                        >{{ step.state === 'done' ? '✓' : '' }}</span
+                      >
+                      <span
+                        class="text-xs sm:text-sm"
+                        [class]="
+                          step.state === 'current'
+                            ? 'font-semibold text-navy'
+                            : step.state === 'done'
+                              ? 'text-ink/80'
+                              : 'text-ink/50'
+                        "
+                        >{{ step.label }}</span
+                      >
+                    </li>
+                  }
+                </ol>
+
+                @if (trackingUrl(); as url) {
+                  <p class="mt-6 rounded-2xl bg-mais-50 p-4 text-sm">
+                    Sendungsnummer <strong class="font-mono">{{ order.tracking_number }}</strong> ·
+                    <a
+                      [href]="url"
+                      target="_blank"
+                      rel="noopener"
+                      class="font-semibold text-navy underline"
+                      >Sendung auf post.ch verfolgen</a
+                    >
+                  </p>
+                }
+                @if (order.shipping_kind === 'pickup' && order.fulfillment_status !== 'delivered') {
+                  <p class="mt-6 rounded-2xl bg-mais-50 p-4 text-sm">
+                    <strong>Abholort:</strong> {{ pickupPlace() }}.
+                    @if (order.fulfillment_status !== 'ready_for_pickup') {
+                      Wir melden uns per E-Mail, sobald deine Bestellung bereitliegt.
+                    }
+                  </p>
+                }
+              }
+              @if (order.payment_status === 'refunded') {
+                <p class="mt-6 rounded-2xl bg-parchment p-4 text-sm">
+                  Den Betrag von {{ order.total_rappen | chf }} haben wir zurückerstattet.
+                </p>
+              }
+            }
+
+            <ul class="mt-6 divide-y divide-ink/10 border-t border-ink/10">
+              @for (item of order.order_items; track $index) {
+                <li class="flex justify-between gap-3 py-3 text-sm">
+                  <span>
+                    <span class="font-semibold">{{ item.quantity }} × {{ item.product_name }}</span>
+                    @for (option of item.options | keyvalue; track option.key) {
+                      <span class="block text-ink/60">{{ option.key }}: {{ option.value }}</span>
+                    }
+                  </span>
+                  <span class="shrink-0">{{ item.line_total_rappen | chf }}</span>
+                </li>
+              }
+            </ul>
+            <dl class="space-y-1 border-t border-ink/10 pt-3 text-sm">
+              <div class="flex justify-between">
+                <dt>{{ order.shipping_name }}</dt>
+                <dd>{{ order.shipping_rappen | shippingPrice }}</dd>
+              </div>
+              <div class="flex justify-between text-lg font-bold">
+                <dt>Total</dt>
+                <dd>{{ order.total_rappen | chf }}</dd>
+              </div>
+              @if (paymentMethod(); as paymentMethod) {
+                <div class="flex justify-between text-ink/60">
+                  <dt>Bezahlt mit</dt>
+                  <dd>{{ paymentMethod }}</dd>
+                </div>
+              }
+            </dl>
+          </div>
+          <p class="mt-6 text-sm text-ink/70">
+            Fragen zu deiner Bestellung? Schreib uns an
+            <a [href]="'mailto:' + contactEmail" class="font-semibold text-navy underline">{{
+              contactEmail
+            }}</a
+            >.
+          </p>
+          <a routerLink="/" class="mt-4 inline-block font-semibold text-navy underline"
+            >Zurück zur Startseite</a
+          >
+        }
+      }
+      @case ('not-found') {
+        <div class="rounded-3xl bg-white p-8 shadow-sm">
+          <h1 class="text-2xl font-bold text-navy">Bestellung nicht gefunden</h1>
+          <p class="mt-2">
+            Bitte öffne den Link aus deiner Bestätigung nochmals. Bei Fragen schreib uns an
+            {{ contactEmail }}.
+          </p>
+        </div>
+      }
+      @case ('error') {
+        <div class="rounded-3xl bg-white p-8 shadow-sm">
+          <h1 class="text-2xl font-bold text-navy">Die Bestellung konnte nicht geladen werden.</h1>
+          <p class="mt-2">Bitte versuche es später nochmals. Bei Fragen: {{ contactEmail }}.</p>
+        </div>
+      }
+    }
+  </div>
+</section>
