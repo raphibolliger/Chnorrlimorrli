@@ -8,7 +8,7 @@ import {
 } from '../_shared/checkout.ts';
 import { adminClient, stripeClient } from '../_shared/clients.ts';
 import { corsHeaders, isAllowedOrigin, json, returnBaseUrl } from '../_shared/cors.ts';
-import { optionsText } from '../_shared/orders.ts';
+import { optionsText, orderPagePath } from '../_shared/orders.ts';
 
 const unavailable = 'Der Shop ist gerade nicht erreichbar. Bitte versuche es später noch einmal.';
 const paymentFailed =
@@ -106,7 +106,7 @@ Deno.serve(async (request) => {
         metadata,
       },
       line_items: lineItems(validation.order, validation.items),
-      success_url: `${baseUrl}/bestellung/erfolg?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${baseUrl}/${orderPagePath(order.access_token)}&neu=1`,
       cancel_url: `${baseUrl}/kasse?abgebrochen=1`,
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     });

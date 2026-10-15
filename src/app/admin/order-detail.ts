@@ -10,41 +10,22 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  FulfillmentAction,
+  fulfillmentFlow,
+  fulfillmentStepLabel,
   OrderAction,
+  orderPagePath,
   paymentMethodLabel,
-  ShippingKind,
 } from '../../../supabase/functions/_shared/orders';
 import { ChfPipe } from '../core/chf.pipe';
 import { ShippingPricePipe } from '../core/shipping-price.pipe';
 import { AdminApi } from './admin-api';
 import { fulfillmentChips, paymentChips } from './order-chips';
+import { Icon } from './ui/icon';
 import { ListSkeleton } from './ui/list-skeleton';
 import { failure, Notice, NoticeBanner, success } from './ui/notice-banner';
 import { AdminPageHeader } from './ui/page-header';
 import { SectionCard } from './ui/section-card';
 import { StatusChip } from './ui/status-chip';
-
-interface FulfillmentStep {
-  action: FulfillmentAction;
-  label: string;
-}
-
-const processing: FulfillmentStep = { action: 'processing', label: 'In Arbeit' };
-
-const fulfillmentSteps: Record<ShippingKind, FulfillmentStep[]> = {
-  pickup: [
-    processing,
-    { action: 'ready_for_pickup', label: 'Abholbereit' },
-    { action: 'delivered', label: 'Abgeholt' },
-  ],
-  postal: [
-    processing,
-    { action: 'shipped', label: 'Versandt' },
-    { action: 'delivered', label: 'Geliefert' },
-  ],
-  local_delivery: [processing, { action: 'delivered', label: 'Geliefert' }],
-};
 
 const eventLabels: Record<string, string> = {
   created: 'Bestellung angelegt',
@@ -70,6 +51,7 @@ const eventLabels: Record<string, string> = {
     FormsModule,
     ChfPipe,
     ShippingPricePipe,
+    Icon,
     ListSkeleton,
     NoticeBanner,
     AdminPageHeader,
@@ -102,9 +84,9 @@ export class AdminOrderDetail {
     if (!order || order.payment_status !== 'paid' || order.fulfillment_status === 'cancelled') {
       return [];
     }
-    return fulfillmentSteps[order.shipping_kind].filter(
-      (step) => step.action !== order.fulfillment_status,
-    );
+    return fulfillmentFlow[order.shipping_kind]
+      .filter((action) => action !== order.fulfillment_status)
+      .map((action) => ({ action, label: fulfillmentStepLabel(action, order.shipping_kind) }));
   });
 
   protected readonly awaitsShipping = computed(() => {
@@ -114,6 +96,11 @@ export class AdminOrderDetail {
       order.payment_status === 'paid' &&
       (order.fulfillment_status === 'new' || order.fulfillment_status === 'processing')
     );
+  });
+
+  protected readonly orderPageUrl = computed(() => {
+    const order = this.order.value();
+    return order ? orderPagePath(order.access_token) : null;
   });
 
   protected readonly canCancel = computed(() => {

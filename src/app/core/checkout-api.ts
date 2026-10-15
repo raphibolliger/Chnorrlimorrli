@@ -40,9 +40,9 @@ export class CheckoutApi {
     return data.url;
   }
 
-  async orderSummary(sessionId: string): Promise<OrderSummary | null> {
+  async orderSummary(code: string): Promise<OrderSummary | null> {
     const { data, error } = await this.supabase.client.functions.invoke<OrderSummary>(
-      `order-summary?session_id=${encodeURIComponent(sessionId)}`,
+      `order-summary?code=${encodeURIComponent(code)}`,
       { method: 'GET' },
     );
     if (error) {

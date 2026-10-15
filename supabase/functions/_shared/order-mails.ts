@@ -11,7 +11,7 @@ import {
   orderReadyForPickup,
   orderShipped,
 } from './mail-templates.ts';
-import { ProductOptions } from './orders.ts';
+import { orderPagePath, ProductOptions } from './orders.ts';
 
 export type CustomerMailKind =
   'confirmation' | 'shipped' | 'ready_for_pickup' | 'delivered' | 'cancelled';
@@ -52,6 +52,7 @@ export async function loadOrderMail(supabase: AdminClient, orderId: string): Pro
     paymentMethod: order.payment_method,
     refunded: order.payment_status === 'refunded',
     trackingNumber: order.tracking_number,
+    orderUrl: `${siteUrl()}/${orderPagePath(order.access_token)}`,
     pickupLocation: order.shipping_methods?.pickup_location ?? null,
     pickupHours: order.shipping_methods?.pickup_hours ?? null,
     items: order.order_items.map((item) => ({
