@@ -17,13 +17,16 @@ import {
   shippingPriceRappen,
 } from '../../../supabase/functions/_shared/pricing';
 import { Cart } from '../core/cart';
-import { CheckoutApi, CheckoutError } from '../core/checkout-api';
+import { CheckoutApi, CheckoutError, checkoutFailed } from '../core/checkout-api';
 import { ChfPipe } from '../core/chf.pipe';
+import { ShippingPricePipe } from '../core/shipping-price.pipe';
 import { ShippingMethod, ShopApi } from '../core/shop-api';
+
+type AddressField = 'street' | 'postalCode' | 'city';
 
 @Component({
   selector: 'app-checkout',
-  imports: [KeyValuePipe, ReactiveFormsModule, RouterLink, ChfPipe],
+  imports: [KeyValuePipe, ReactiveFormsModule, RouterLink, ChfPipe, ShippingPricePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './checkout.html',
 })
@@ -71,9 +74,15 @@ export class Checkout {
   protected readonly totalRappen = computed(
     () => this.cart.subtotalRappen() + this.shippingRappen(),
   );
-  protected readonly postalCodeValid = computed(() =>
-    isSwissPostalCode(this.formValue().postalCode ?? ''),
-  );
+  protected readonly addressErrors = computed<Record<AddressField, boolean>>(() => {
+    const { street = '', postalCode = '', city = '' } = this.formValue();
+    const needsAddress = this.needsAddress();
+    return {
+      street: needsAddress && !street.trim(),
+      postalCode: needsAddress && !isSwissPostalCode(postalCode),
+      city: needsAddress && !city.trim(),
+    };
+  });
   protected readonly localDeliveryBlocked = computed(() => {
     const method = this.selectedMethod();
     const postalCode = this.formValue().postalCode ?? '';
@@ -97,26 +106,14 @@ export class Checkout {
     return field.invalid && (field.touched || this.submitted());
   }
 
-  protected addressMissing(field: 'street' | 'postalCode' | 'city'): boolean {
-    if (!this.needsAddress()) {
-      return false;
-    }
-    const control = this.form.controls[field];
-    const touched = control.touched || this.submitted();
-    if (field === 'postalCode') {
-      return touched && !this.postalCodeValid();
-    }
-    return touched && !control.value.trim();
+  protected addressMissing(field: AddressField): boolean {
+    return this.addressErrors()[field] && (this.form.controls[field].touched || this.submitted());
   }
 
   protected async submit(): Promise<void> {
     this.submitted.set(true);
     this.errors.set([]);
-    const addressIncomplete =
-      this.needsAddress() &&
-      (!this.form.controls.street.value.trim() ||
-        !this.postalCodeValid() ||
-        !this.form.controls.city.value.trim());
+    const addressIncomplete = Object.values(this.addressErrors()).some(Boolean);
     if (this.form.invalid || addressIncomplete || this.localDeliveryBlocked()) {
       this.form.markAllAsTouched();
       return;
@@ -146,11 +143,7 @@ export class Checkout {
       });
       this.document.location.assign(url);
     } catch (error) {
-      this.errors.set(
-        error instanceof CheckoutError
-          ? error.messages
-          : ['Die Zahlung konnte nicht gestartet werden. Bitte versuche es später noch einmal.'],
-      );
+      this.errors.set(error instanceof CheckoutError ? error.messages : [checkoutFailed]);
       this.submitting.set(false);
     }
   }

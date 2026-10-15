@@ -55,9 +55,7 @@
             <dl class="space-y-1 border-t border-ink/10 pt-3 text-sm">
               <div class="flex justify-between">
                 <dt>{{ order.shipping_name }}</dt>
-                <dd>
-                  {{ order.shipping_rappen === 0 ? 'kostenlos' : (order.shipping_rappen | chf) }}
-                </dd>
+                <dd>{{ order.shipping_rappen | shippingPrice }}</dd>
               </div>
               <div class="flex justify-between text-lg font-bold">
                 <dt>Total</dt>

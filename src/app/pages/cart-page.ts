@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { KeyValuePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { maxLineQuantity } from '../../../supabase/functions/_shared/pricing';
 import { ProductImage } from '../components/product-image';
 import { Cart, CartItem, cartItemKey } from '../core/cart';
 import { ChfPipe } from '../core/chf.pipe';
@@ -44,7 +45,7 @@ export class CartPage {
         item,
         product,
         unavailable,
-        maxQuantity: product ? maxOrderQuantity(product) : 20,
+        maxQuantity: product ? maxOrderQuantity(product) : maxLineQuantity,
       };
     });
   });

@@ -2,7 +2,7 @@ import { assert, assertEquals } from 'jsr:@std/assert@1';
 import {
   CatalogProduct,
   CatalogShippingMethod,
-  CheckoutRequest,
+  UntrustedCheckoutRequest,
   validateCheckout,
 } from './checkout.ts';
 
@@ -58,7 +58,7 @@ const methods: CatalogShippingMethod[] = [
   },
 ];
 
-function request(overrides: Partial<CheckoutRequest> = {}): CheckoutRequest {
+function request(overrides: UntrustedCheckoutRequest = {}): UntrustedCheckoutRequest {
   return {
     items: [{ productId: 'book-1', quantity: 1, options: {} }],
     shippingMethodId: 'post',

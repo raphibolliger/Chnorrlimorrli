@@ -2,8 +2,14 @@ import { registerLocaleData } from '@angular/common';
 import localeDeCh from '@angular/common/locales/de-CH';
 import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
+import {
+  provideRouter,
+  TitleStrategy,
+  withComponentInputBinding,
+  withInMemoryScrolling,
+} from '@angular/router';
 import { routes } from './app.routes';
+import { PageMeta } from './core/page-meta';
 
 registerLocaleData(localeDeCh);
 
@@ -17,5 +23,6 @@ export const appConfig: ApplicationConfig = {
     ),
     provideClientHydration(withEventReplay()),
     { provide: LOCALE_ID, useValue: 'de-CH' },
+    { provide: TitleStrategy, useClass: PageMeta },
   ],
 };

@@ -2,8 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SiteImage } from '../components/site-image';
-import { AdminAuth } from '../core/admin-auth';
-import { fieldClass, labelClass, primaryButtonClass, textButtonClass } from './ui/classes';
+import { AdminAuth } from './admin-auth';
 
 @Component({
   selector: 'app-admin-login',
@@ -21,10 +20,6 @@ export class AdminLogin {
   protected readonly code = signal('');
   protected readonly busy = signal(false);
   protected readonly message = signal<string | null>(null);
-  protected readonly fieldClass = fieldClass;
-  protected readonly labelClass = labelClass;
-  protected readonly primaryButtonClass = primaryButtonClass;
-  protected readonly textButtonClass = textButtonClass;
 
   protected async requestCode(): Promise<void> {
     if (!this.email().includes('@')) {

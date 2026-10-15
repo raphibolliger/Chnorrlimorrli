@@ -1,4 +1,6 @@
 import { computed, effect, Injectable, signal } from '@angular/core';
+import type { ProductOptions } from '../../../supabase/functions/_shared/orders';
+import { subtotalRappen } from '../../../supabase/functions/_shared/pricing';
 
 export interface CartItem {
   productId: string;
@@ -6,7 +8,7 @@ export interface CartItem {
   name: string;
   unitPriceRappen: number;
   imagePath: string | null;
-  options: Record<string, string>;
+  options: ProductOptions;
   quantity: number;
 }
 
@@ -35,9 +37,7 @@ export class Cart {
 
   readonly items = this.state.asReadonly();
   readonly count = computed(() => this.state().reduce((sum, item) => sum + item.quantity, 0));
-  readonly subtotalRappen = computed(() =>
-    this.state().reduce((sum, item) => sum + item.unitPriceRappen * item.quantity, 0),
-  );
+  readonly subtotalRappen = computed(() => subtotalRappen(this.state()));
 
   constructor() {
     effect(() => {
@@ -66,10 +66,12 @@ export class Cart {
   }
 
   setQuantity(key: string, quantity: number): void {
+    if (quantity <= 0) {
+      this.remove(key);
+      return;
+    }
     this.state.update((items) =>
-      quantity <= 0
-        ? items.filter((item) => cartItemKey(item) !== key)
-        : items.map((item) => (cartItemKey(item) === key ? { ...item, quantity } : item)),
+      items.map((item) => (cartItemKey(item) === key ? { ...item, quantity } : item)),
     );
   }
 

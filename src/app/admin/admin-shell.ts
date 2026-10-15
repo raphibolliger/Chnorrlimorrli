@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { AdminAuth } from '../core/admin-auth';
+import { AdminAuth } from './admin-auth';
 import { SiteImage } from '../components/site-image';
 import { Icon } from './ui/icon';
 import { IconName } from './ui/tones';

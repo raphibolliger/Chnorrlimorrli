@@ -1,17 +1,24 @@
 import { inject, Injectable } from '@angular/core';
 import { FunctionsHttpError } from '@supabase/supabase-js';
+import type {
+  FulfillmentStatus,
+  OrderUpdateRequest,
+  OrderUpdateResult,
+  PaymentStatus,
+  TableRow,
+} from '../../../supabase/functions/_shared/orders';
 import { Supabase } from '../core/supabase';
-import { Database } from '../../types/database.types';
+import { UserFacingError } from './user-facing-error';
 
-type Tables = Database['public']['Tables'];
-type Enums = Database['public']['Enums'];
+export type OrderView = 'open' | 'done' | 'all' | 'unpaid';
 
-export type PaymentStatus = Enums['payment_status'];
-export type FulfillmentStatus = Enums['fulfillment_status'];
-export type OrderAction = 'processing' | 'ready_for_pickup' | 'shipped' | 'delivered' | 'cancel';
+export interface OrderFilter {
+  view: OrderView;
+  search: string;
+}
 
 export type OrderListEntry = Pick<
-  Tables['orders']['Row'],
+  TableRow<'orders'>,
   | 'id'
   | 'order_number'
   | 'created_at'
@@ -25,43 +32,23 @@ export type OrderListEntry = Pick<
   | 'fulfillment_status'
 >;
 
-export type OrderDetail = Tables['orders']['Row'] & {
-  order_items: Tables['order_items']['Row'][];
-  order_events: Tables['order_events']['Row'][];
+export type OrderDetail = TableRow<'orders'> & {
+  order_items: TableRow<'order_items'>[];
+  order_events: TableRow<'order_events'>[];
 };
 
-export const paymentStatusLabels: Record<PaymentStatus, string> = {
-  pending: 'Zahlung offen',
-  paid: 'Bezahlt',
-  failed: 'Zahlung fehlgeschlagen',
-  expired: 'Abgebrochen',
-  refunded: 'Erstattet',
+const orderViews: Record<
+  OrderView,
+  { payment?: PaymentStatus[]; fulfillment?: FulfillmentStatus[] }
+> = {
+  open: { payment: ['paid'], fulfillment: ['new', 'processing', 'ready_for_pickup', 'shipped'] },
+  done: { fulfillment: ['delivered', 'cancelled'] },
+  all: { payment: ['paid', 'refunded'] },
+  unpaid: { payment: ['pending', 'failed', 'expired'] },
 };
 
-export const fulfillmentStatusLabels: Record<FulfillmentStatus, string> = {
-  new: 'Neu',
-  processing: 'In Arbeit',
-  ready_for_pickup: 'Abholbereit',
-  shipped: 'Versandt',
-  delivered: 'Geliefert',
-  cancelled: 'Storniert',
-};
-
-const paymentMethodLabels: Record<string, string> = {
-  card: 'Karte',
-  twint: 'TWINT',
-  apple_pay: 'Apple Pay',
-  google_pay: 'Google Pay',
-  link: 'Link',
-};
-
-export function paymentMethodLabel(method: string | null): string {
-  return method ? (paymentMethodLabels[method] ?? method) : '–';
-}
-
-export interface OrderFilter {
-  view: 'open' | 'done' | 'all' | 'unpaid';
-  search: string;
+function quotedPattern(search: string): string {
+  return `"%${search.replace(/["\\]/g, '\\$&')}%"`;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -69,6 +56,7 @@ export class AdminApi {
   private readonly supabase = inject(Supabase);
 
   async orders(filter: OrderFilter): Promise<OrderListEntry[]> {
+    const { payment, fulfillment } = orderViews[filter.view];
     let query = this.supabase.client
       .from('orders')
       .select(
@@ -76,66 +64,47 @@ export class AdminApi {
       )
       .order('created_at', { ascending: false })
       .limit(200);
-    if (filter.view === 'open') {
-      query = query
-        .eq('payment_status', 'paid')
-        .in('fulfillment_status', ['new', 'processing', 'ready_for_pickup', 'shipped']);
-    } else if (filter.view === 'done') {
-      query = query.in('fulfillment_status', ['delivered', 'cancelled']);
-    } else if (filter.view === 'unpaid') {
-      query = query.in('payment_status', ['pending', 'failed', 'expired']);
-    } else {
-      query = query.in('payment_status', ['paid', 'refunded']);
+    if (payment) {
+      query = query.in('payment_status', payment);
+    }
+    if (fulfillment) {
+      query = query.in('fulfillment_status', fulfillment);
     }
     const search = filter.search.trim();
-    if (search) {
-      const number = Number(search.replace('#', ''));
-      query =
-        Number.isInteger(number) && number > 0
-          ? query.eq('order_number', number)
-          : query.or(
-              `last_name.ilike.%${search}%,first_name.ilike.%${search}%,email.ilike.%${search}%`,
-            );
+    const orderNumber = Number(search.replace('#', ''));
+    if (Number.isInteger(orderNumber) && orderNumber > 0) {
+      query = query.eq('order_number', orderNumber);
+    } else if (search) {
+      const pattern = quotedPattern(search);
+      query = query.or(
+        `last_name.ilike.${pattern},first_name.ilike.${pattern},email.ilike.${pattern}`,
+      );
     }
-    const { data, error } = await query;
-    if (error) {
-      throw error;
-    }
+    const { data } = await query.throwOnError();
     return data;
   }
 
   async order(id: string): Promise<OrderDetail | null> {
-    const { data, error } = await this.supabase.client
+    const { data } = await this.supabase.client
       .from('orders')
       .select('*, order_items(*), order_events(*)')
       .eq('id', id)
       .order('created_at', { referencedTable: 'order_events', ascending: false })
-      .maybeSingle();
-    if (error) {
-      throw error;
-    }
+      .maybeSingle()
+      .throwOnError();
     return data;
   }
 
-  async updateOrder(
-    orderId: string,
-    action: OrderAction,
-    options: { trackingNumber?: string; sendMail: boolean },
-  ): Promise<{ refunded?: boolean; mailed?: boolean }> {
-    const { data, error } = await this.supabase.client.functions.invoke<{
-      refunded?: boolean;
-      mailed?: boolean;
-    }>('admin-update-order', {
-      body: { orderId, action, trackingNumber: options.trackingNumber, sendMail: options.sendMail },
-    });
-    if (error) {
-      let message = 'Die Bestellung konnte nicht aktualisiert werden.';
-      if (error instanceof FunctionsHttpError) {
-        const body = (await error.context.json().catch(() => ({}))) as { error?: string };
-        message = body.error ?? message;
-      }
-      throw new Error(message);
+  async updateOrder(request: OrderUpdateRequest): Promise<OrderUpdateResult> {
+    const { data, error } = await this.supabase.client.functions.invoke<OrderUpdateResult>(
+      'admin-update-order',
+      { body: request },
+    );
+    if (error || !data) {
+      const body: { error?: string } =
+        error instanceof FunctionsHttpError ? await error.context.json().catch(() => ({})) : {};
+      throw new UserFacingError(body.error ?? 'Die Bestellung konnte nicht aktualisiert werden.');
     }
-    return data ?? {};
+    return data;
   }
 }

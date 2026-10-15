@@ -10,12 +10,14 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Cart } from '../core/cart';
-import { CheckoutApi, OrderSummary } from '../core/checkout-api';
+import type { OrderSummary } from '../../../supabase/functions/_shared/orders';
+import { CheckoutApi } from '../core/checkout-api';
 import { ChfPipe } from '../core/chf.pipe';
+import { ShippingPricePipe } from '../core/shipping-price.pipe';
 
 @Component({
   selector: 'app-order-success',
-  imports: [KeyValuePipe, RouterLink, ChfPipe],
+  imports: [KeyValuePipe, RouterLink, ChfPipe, ShippingPricePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './order-success.html',
 })

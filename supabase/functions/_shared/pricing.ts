@@ -8,6 +8,8 @@ export interface CartLine {
   quantity: number;
 }
 
+export const maxLineQuantity = 20;
+
 export function subtotalRappen(lines: CartLine[]): number {
   return lines.reduce((sum, line) => sum + line.unitPriceRappen * line.quantity, 0);
 }
@@ -35,4 +37,8 @@ export function formatChf(rappen: number): string {
   const francs = Math.floor(rappen / 100);
   const cents = String(rappen % 100).padStart(2, '0');
   return `CHF ${francs}.${cents}`;
+}
+
+export function formatShippingPrice(rappen: number): string {
+  return rappen === 0 ? 'kostenlos' : formatChf(rappen);
 }

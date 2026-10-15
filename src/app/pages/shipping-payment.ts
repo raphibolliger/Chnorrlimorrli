@@ -3,11 +3,12 @@ import { RouterLink } from '@angular/router';
 import { OpenPoint } from '../components/open-point';
 import { PageIntro } from '../components/page-intro';
 import { ChfPipe } from '../core/chf.pipe';
+import { ShippingPricePipe } from '../core/shipping-price.pipe';
 import { ShippingMethod, ShopApi } from '../core/shop-api';
 
 @Component({
   selector: 'app-shipping-payment',
-  imports: [RouterLink, OpenPoint, PageIntro, ChfPipe],
+  imports: [RouterLink, OpenPoint, PageIntro, ChfPipe, ShippingPricePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shipping-payment.html',
 })

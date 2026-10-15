@@ -1,15 +1,29 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { adminClient, stripeClient } from '../_shared/clients.ts';
+import { AdminClient, adminClient, stripeClient } from '../_shared/clients.ts';
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { CustomerMailKind, sendCustomerMail } from '../_shared/order-mails.ts';
+import {
+  FulfillmentAction,
+  OrderUpdateRequest,
+  OrderUpdateResult,
+  TableRow,
+} from '../_shared/orders.ts';
 
-type Action = 'processing' | 'ready_for_pickup' | 'shipped' | 'delivered' | 'cancel';
+type OrderState = Pick<
+  TableRow<'orders'>,
+  'id' | 'payment_status' | 'paid_at' | 'stripe_payment_intent_id' | 'stripe_checkout_session_id'
+>;
 
-const mailFor: Partial<Record<Action, CustomerMailKind>> = {
+const fulfillmentMails: Record<FulfillmentAction, CustomerMailKind | null> = {
+  processing: null,
   ready_for_pickup: 'ready_for_pickup',
   shipped: 'shipped',
   delivered: 'delivered',
 };
+
+function isFulfillmentAction(action: unknown): action is FulfillmentAction {
+  return typeof action === 'string' && action in fulfillmentMails;
+}
 
 async function isAdmin(request: Request): Promise<boolean> {
   const authorization = request.headers.get('Authorization');
@@ -28,6 +42,51 @@ async function isAdmin(request: Request): Promise<boolean> {
   return !error && data === true;
 }
 
+async function expireCheckoutSession(sessionId: string): Promise<void> {
+  try {
+    await stripeClient().checkout.sessions.expire(sessionId);
+  } catch (error) {
+    console.warn('session could not be expired', error);
+  }
+}
+
+async function cancel(
+  supabase: AdminClient,
+  order: OrderState,
+  notify: boolean,
+): Promise<OrderUpdateResult> {
+  const refundableIntent = order.payment_status === 'paid' ? order.stripe_payment_intent_id : null;
+  if (refundableIntent) {
+    await stripeClient().refunds.create({ payment_intent: refundableIntent });
+  } else if (order.payment_status === 'pending' && order.stripe_checkout_session_id) {
+    await expireCheckoutSession(order.stripe_checkout_session_id);
+  }
+  const refunded = refundableIntent !== null;
+  await supabase.rpc('cancel_order', { p_order_id: order.id, p_refunded: refunded }).throwOnError();
+  const wasPaid = order.paid_at !== null;
+  const mailed = notify && wasPaid && (await sendCustomerMail(supabase, order.id, 'cancelled'));
+  return { refunded, mailed };
+}
+
+async function fulfil(
+  supabase: AdminClient,
+  order: OrderState,
+  action: FulfillmentAction,
+  trackingNumber: string,
+  notify: boolean,
+): Promise<OrderUpdateResult> {
+  await supabase
+    .rpc('set_fulfillment_status', {
+      p_order_id: order.id,
+      p_status: action,
+      p_tracking_number: trackingNumber,
+    })
+    .throwOnError();
+  const mail = fulfillmentMails[action];
+  const mailed = notify && mail !== null && (await sendCustomerMail(supabase, order.id, mail));
+  return { refunded: false, mailed };
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders(request) });
@@ -39,71 +98,32 @@ Deno.serve(async (request) => {
     return json(request, { error: 'Keine Berechtigung.' }, 403);
   }
 
-  const {
-    orderId,
-    action,
-    trackingNumber,
-    sendMail = true,
-  } = (await request.json().catch(() => ({}))) as {
-    orderId?: string;
-    action?: Action;
-    trackingNumber?: string;
-    sendMail?: boolean;
-  };
-  if (!orderId || !action) {
+  const body: Partial<OrderUpdateRequest> | null = await request.json().catch(() => null);
+  const action = body?.action;
+  if (!body?.orderId || !(action === 'cancel' || isFulfillmentAction(action))) {
     return json(request, { error: 'Bestellung und Aktion fehlen.' }, 400);
   }
 
   const supabase = adminClient();
-  const { data: order, error: loadError } = await supabase
+  const { data: order } = await supabase
     .from('orders')
-    .select(
-      'id, payment_status, fulfillment_status, stripe_payment_intent_id, stripe_checkout_session_id',
-    )
-    .eq('id', orderId)
+    .select('id, payment_status, paid_at, stripe_payment_intent_id, stripe_checkout_session_id')
+    .eq('id', body.orderId)
     .maybeSingle();
-  if (loadError || !order) {
+  if (!order) {
     return json(request, { error: 'Bestellung nicht gefunden.' }, 404);
   }
+  if (action !== 'cancel' && order.payment_status !== 'paid') {
+    return json(request, { error: 'Nur bezahlte Bestellungen können bearbeitet werden.' }, 409);
+  }
 
+  const notify = body.sendMail !== false;
   try {
-    if (action === 'cancel') {
-      let refunded = false;
-      if (order.payment_status === 'paid' && order.stripe_payment_intent_id) {
-        await stripeClient().refunds.create({ payment_intent: order.stripe_payment_intent_id });
-        refunded = true;
-      } else if (order.payment_status === 'pending' && order.stripe_checkout_session_id) {
-        try {
-          await stripeClient().checkout.sessions.expire(order.stripe_checkout_session_id);
-        } catch (error) {
-          console.warn('session could not be expired', error);
-        }
-      }
-      const { error } = await supabase.rpc('cancel_order', {
-        p_order_id: orderId,
-        p_refunded: refunded,
-      });
-      if (error) throw error;
-      const mailed =
-        sendMail && order.payment_status !== 'pending' && order.payment_status !== 'expired'
-          ? await sendCustomerMail(supabase, orderId, 'cancelled', refunded)
-          : false;
-      return json(request, { ok: true, refunded, mailed });
-    }
-
-    if (order.payment_status !== 'paid') {
-      return json(request, { error: 'Nur bezahlte Bestellungen können bearbeitet werden.' }, 409);
-    }
-    const { error } = await supabase.rpc('set_fulfillment_status', {
-      p_order_id: orderId,
-      p_status: action,
-      p_tracking_number: trackingNumber?.trim() ?? '',
-    });
-    if (error) throw error;
-    const mailKind = mailFor[action];
-    const mailed =
-      sendMail && mailKind ? await sendCustomerMail(supabase, orderId, mailKind) : false;
-    return json(request, { ok: true, mailed });
+    const result =
+      action === 'cancel'
+        ? await cancel(supabase, order, notify)
+        : await fulfil(supabase, order, action, body.trackingNumber?.trim() ?? '', notify);
+    return json(request, result);
   } catch (error) {
     console.error('order update failed', error);
     return json(request, { error: 'Die Bestellung konnte nicht aktualisiert werden.' }, 500);

@@ -8,36 +8,26 @@
     backLink="/admin/bestellungen"
   >
     <div class="mt-2 flex flex-wrap gap-1">
-      <app-status-chip [chip]="paymentChip(order.payment_status)" />
-      <app-status-chip [chip]="fulfillmentChip(order.fulfillment_status)" />
+      <app-status-chip [chip]="paymentChips[order.payment_status]" />
+      <app-status-chip [chip]="fulfillmentChips[order.fulfillment_status]" />
     </div>
   </app-admin-page-header>
 
   <div class="grid gap-4 p-4 md:grid-cols-2 md:p-0">
-    @if (feedback(); as feedback) {
-      <p
-        class="rounded-xl p-3 text-sm md:col-span-2"
-        [class]="
-          feedback.tone === 'ok'
-            ? 'bg-success-soft text-success-strong'
-            : 'bg-danger-soft text-danger-strong'
-        "
-        role="status"
-      >
-        {{ feedback.text }}
-      </p>
+    @if (notice(); as notice) {
+      <app-notice-banner [notice]="notice" class="md:col-span-2" />
     }
 
     @if (actions().length > 0 || canCancel()) {
       <app-section-card title="Status ändern" icon="edit" class="md:col-span-2">
         @if (awaitsShipping()) {
           <label class="mb-3 block max-w-sm">
-            <span [class]="labelClass"
+            <span class="admin-label"
               >Sendungsnummer
               <span class="font-normal text-gray-500">(für «Versandt», freiwillig)</span></span
             >
             <input
-              [class]="fieldClass"
+              class="admin-field"
               [ngModel]="trackingNumber()"
               (ngModelChange)="trackingNumber.set($event)"
             />
@@ -46,7 +36,7 @@
         <label class="mb-4 flex items-center gap-2 text-sm text-gray-700">
           <input
             type="checkbox"
-            [class]="checkboxClass"
+            class="admin-checkbox"
             [ngModel]="notifyCustomer()"
             (ngModelChange)="notifyCustomer.set($event)"
           />
@@ -58,7 +48,7 @@
               type="button"
               (click)="run(step.action)"
               [disabled]="busy()"
-              [class]="primaryButtonClass"
+              class="admin-button-primary"
             >
               {{ step.label }}
             </button>
@@ -68,7 +58,7 @@
               type="button"
               (click)="confirmCancel.set(true)"
               [disabled]="busy()"
-              [class]="secondaryButtonClass"
+              class="admin-button-secondary"
             >
               Stornieren
             </button>
@@ -80,6 +70,9 @@
               @if (order.payment_status === 'paid') {
                 Die Bestellung wird storniert und {{ order.total_rappen | chf }} werden über Stripe
                 zurückerstattet. Der Lagerbestand wird wieder erhöht.
+              } @else if (order.payment_status === 'refunded') {
+                Die Bestellung wird storniert. Der Betrag wurde bereits über Stripe erstattet. Der
+                Lagerbestand wird wieder erhöht.
               } @else {
                 Die Bestellung wird storniert. Es wurde nichts bezahlt.
               }
@@ -89,14 +82,14 @@
                 type="button"
                 (click)="run('cancel')"
                 [disabled]="busy()"
-                [class]="dangerButtonClass"
+                class="admin-button-danger"
               >
                 Ja, stornieren
               </button>
               <button
                 type="button"
                 (click)="confirmCancel.set(false)"
-                [class]="secondaryButtonClass"
+                class="admin-button-secondary"
               >
                 Abbrechen
               </button>
@@ -162,7 +155,7 @@
         <div class="flex justify-between">
           <dt class="text-gray-500">Versand</dt>
           <dd class="tabular-nums">
-            {{ order.shipping_rappen === 0 ? 'kostenlos' : (order.shipping_rappen | chf) }}
+            {{ order.shipping_rappen | shippingPrice }}
           </dd>
         </div>
         <div class="flex justify-between font-semibold">
@@ -171,7 +164,7 @@
         </div>
         <div class="flex justify-between">
           <dt class="text-gray-500">Bezahlt mit</dt>
-          <dd>{{ paymentMethodLabel(order.payment_method) }}</dd>
+          <dd>{{ paymentMethodLabel(order.payment_method) ?? '–' }}</dd>
         </div>
       </dl>
       @if (order.customer_note) {

@@ -3,12 +3,15 @@ set -euo pipefail
 
 email="${1:?Usage: create-admin.sh email}"
 email="$(printf '%s' "$email" | tr '[:upper:]' '[:lower:]')"
+if [[ ! "$email" =~ ^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$ ]]; then
+  echo "Not a valid email address: $email" >&2
+  exit 1
+fi
 
 if [[ -n "${PROJECT_REF:-}" ]]; then
   : "${SUPABASE_ACCESS_TOKEN:?SUPABASE_ACCESS_TOKEN is required for a remote project}"
   SUPABASE_URL="https://$PROJECT_REF.supabase.co"
-  SUPABASE_SERVICE_KEY=$(supabase projects api-keys --project-ref "$PROJECT_REF" --reveal --output json \
-    | jq -r 'map(select(.type == "secret")) | first | .api_key')
+  SUPABASE_SERVICE_KEY="$("$(dirname "$0")/remote-service-key.sh" "$PROJECT_REF")"
 else
   : "${SUPABASE_URL:?SUPABASE_URL is required}"
   : "${SUPABASE_SERVICE_KEY:?SUPABASE_SERVICE_KEY is required}"
@@ -20,7 +23,7 @@ response=$(curl --silent --show-error \
   --header "Authorization: Bearer $SUPABASE_SERVICE_KEY" \
   --header "apikey: $SUPABASE_SERVICE_KEY" \
   --header "Content-Type: application/json" \
-  --data "{\"email\": \"$email\", \"email_confirm\": true}")
+  --data "$(jq -n --arg email "$email" '{email: $email, email_confirm: true}')")
 
 if ! printf '%s' "$response" | grep -q '"id"' && ! printf '%s' "$response" | grep -q 'email_exists'; then
   echo "Creating the auth user failed: $response" >&2

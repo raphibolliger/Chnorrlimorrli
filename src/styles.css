@@ -65,3 +65,43 @@
     font-family: var(--font-sans);
   }
 }
+
+@utility admin-field {
+  @apply min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-info focus:ring-2 focus:ring-info-muted disabled:bg-gray-50 md:min-h-9;
+}
+
+@utility admin-textarea {
+  @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-info focus:ring-2 focus:ring-info-muted;
+}
+
+@utility admin-label {
+  @apply mb-1 block text-sm font-medium text-gray-700;
+}
+
+@utility admin-hint {
+  @apply mt-1 block text-xs text-gray-500;
+}
+
+@utility admin-checkbox {
+  @apply size-4 rounded border-gray-300 accent-blue-600;
+}
+
+@utility admin-button {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50 md:min-h-9;
+}
+
+@utility admin-button-primary {
+  @apply admin-button bg-info text-white enabled:hover:bg-info-strong;
+}
+
+@utility admin-button-secondary {
+  @apply admin-button border border-gray-300 bg-white text-gray-800 enabled:hover:bg-gray-50;
+}
+
+@utility admin-button-danger {
+  @apply admin-button bg-danger text-white enabled:hover:bg-danger-strong;
+}
+
+@utility admin-button-text {
+  @apply inline-flex min-h-11 items-center gap-1.5 rounded-full px-2 text-sm font-medium text-info hover:bg-info-soft md:min-h-8;
+}
