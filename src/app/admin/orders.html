@@ -1,75 +1,123 @@
-<div class="flex flex-wrap items-end justify-between gap-3">
-  <h1 class="text-2xl font-bold text-navy">Bestellungen</h1>
-  <button type="button" (click)="orders.reload()" class="text-sm font-semibold text-navy underline">
+<app-admin-page-header title="Bestellungen" subtitle="Neueste zuerst">
+  <button
+    pageActions
+    type="button"
+    (click)="orders.reload()"
+    class="hidden h-9 items-center rounded-full border border-gray-300 bg-white px-4 text-sm font-medium text-gray-800 hover:bg-gray-50 md:inline-flex"
+  >
     Aktualisieren
   </button>
-</div>
-
-<div class="mt-4 flex gap-2 overflow-x-auto pb-1">
-  @for (option of views; track option.value) {
-    <button
-      type="button"
-      (click)="view.set(option.value)"
-      class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold ring-1"
-      [class]="
-        view() === option.value ? 'bg-navy text-white ring-navy' : 'bg-white text-ink ring-ink/15'
-      "
-    >
-      {{ option.label }}
-    </button>
-  }
-</div>
-
-<label class="mt-3 block">
-  <span class="sr-only">Suchen</span>
-  <input
-    type="search"
-    placeholder="Name, E-Mail oder Bestellnummer"
-    [value]="search()"
-    (input)="search.set($any($event.target).value)"
-    class="w-full rounded-xl border-0 bg-white px-4 py-3 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
-  />
-</label>
-
-@if (orders.isLoading() && !orders.hasValue()) {
-  <div class="mt-4 space-y-3" aria-hidden="true">
-    @for (placeholder of [1, 2, 3]; track placeholder) {
-      <div class="h-20 animate-pulse rounded-2xl bg-white/70"></div>
-    }
+  <div class="mt-3 grid gap-2 md:grid-cols-[minmax(0,360px)_minmax(0,320px)] md:justify-between">
+    <app-segmented-control
+      label="Ansicht"
+      [options]="views"
+      [value]="view()"
+      (valueChange)="view.set($event)"
+    />
+    <app-search-field placeholder="Name, E-Mail oder Nummer" [(value)]="search" />
   </div>
-} @else if (orders.error()) {
-  <p class="mt-4 rounded-2xl bg-red-50 p-4 text-red-800">
-    Die Bestellungen konnten nicht geladen werden.
-  </p>
-} @else {
-  <ul class="mt-4 space-y-3">
-    @for (order of orders.value(); track order.id) {
-      <li>
+</app-admin-page-header>
+
+<div class="p-4 md:p-0">
+  @if (orders.isLoading() && !orders.hasValue()) {
+    <app-list-skeleton />
+  } @else if (orders.error()) {
+    <p class="rounded-xl bg-danger-soft p-4 text-sm text-danger-strong">
+      Die Bestellungen konnten nicht geladen werden.
+    </p>
+  } @else {
+    <div class="grid gap-3 md:hidden">
+      @for (order of orders.value(); track order.id) {
         <a
           [routerLink]="['/admin/bestellungen', order.id]"
-          class="block rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5 hover:ring-navy/40"
+          class="block rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 active:bg-gray-50"
         >
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
-              <p class="font-semibold text-navy">
-                #{{ order.order_number }} · {{ order.first_name }} {{ order.last_name }}
-              </p>
-              <p class="truncate text-sm text-ink/60">
-                {{ order.created_at | date: 'd.M.yyyy, HH:mm' }} · {{ order.shipping_name }}
-              </p>
+              <div class="font-mono text-xs text-gray-500">#{{ order.order_number }}</div>
+              <div class="truncate font-medium">{{ order.first_name }} {{ order.last_name }}</div>
             </div>
-            <p class="shrink-0 font-semibold">{{ order.total_rappen | chf }}</p>
+            <div class="shrink-0 font-semibold tabular-nums">{{ order.total_rappen | chf }}</div>
           </div>
-          <div class="mt-2 flex flex-wrap gap-2">
-            <app-status-badge [payment]="order.payment_status" />
-            @if (order.payment_status === 'paid' || order.fulfillment_status === 'cancelled') {
-              <app-status-badge [fulfillment]="order.fulfillment_status" />
-            }
+          <div class="mt-1 truncate text-sm text-gray-600">{{ order.shipping_name }}</div>
+          <div class="mt-2 flex items-center justify-between gap-2">
+            <span class="truncate text-xs text-gray-500 tabular-nums">{{
+              order.created_at | date: 'dd.MM.yyyy, HH:mm'
+            }}</span>
+            <span class="flex shrink-0 gap-1">
+              <app-status-chip [chip]="paymentChip(order.payment_status)" />
+              @if (showFulfillment(order)) {
+                <app-status-chip [chip]="fulfillmentChip(order.fulfillment_status)" />
+              }
+            </span>
           </div>
         </a>
-      </li>
-    } @empty {
-      <li class="rounded-2xl bg-white p-6 text-center text-ink/60">Keine Bestellungen.</li>
-    }
-  </ul>
-}
+      } @empty {
+        <app-empty-state icon="orders" message="Keine Bestellungen in dieser Ansicht." />
+      }
+    </div>
+
+    <div
+      class="hidden overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 md:block"
+    >
+      <table class="w-full table-fixed border-separate border-spacing-0 text-sm">
+        <colgroup>
+          <col class="w-24" />
+          <col class="w-40" />
+          <col />
+          <col class="w-44" />
+          <col class="w-28" />
+          <col class="w-56" />
+        </colgroup>
+        <thead>
+          <tr class="text-left text-xs font-medium tracking-wide text-gray-500 uppercase">
+            <th class="h-10 border-b border-gray-200 px-4">Nr.</th>
+            <th class="h-10 border-b border-gray-200 px-3">Datum</th>
+            <th class="h-10 border-b border-gray-200 px-3">Kundin / Kunde</th>
+            <th class="h-10 border-b border-gray-200 px-3">Versand</th>
+            <th class="h-10 border-b border-gray-200 px-3 text-right">Betrag</th>
+            <th class="h-10 border-b border-gray-200 px-3">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of orders.value(); track order.id) {
+            <tr
+              class="cursor-pointer even:bg-gray-50 hover:bg-gray-100"
+              tabindex="0"
+              (click)="open(order)"
+              (keydown.enter)="open(order)"
+            >
+              <td class="h-11 truncate border-b border-gray-100 px-4 font-mono">
+                #{{ order.order_number }}
+              </td>
+              <td class="h-11 truncate border-b border-gray-100 px-3 tabular-nums">
+                {{ order.created_at | date: 'dd.MM.yyyy, HH:mm' }}
+              </td>
+              <td class="h-11 truncate border-b border-gray-100 px-3">
+                {{ order.first_name }} {{ order.last_name }}
+                <span class="text-gray-500"> · {{ order.email }}</span>
+              </td>
+              <td class="h-11 truncate border-b border-gray-100 px-3">{{ order.shipping_name }}</td>
+              <td
+                class="h-11 truncate border-b border-gray-100 px-3 text-right font-medium tabular-nums"
+              >
+                {{ order.total_rappen | chf }}
+              </td>
+              <td class="h-11 border-b border-gray-100 px-3">
+                <span class="flex gap-1">
+                  <app-status-chip [chip]="paymentChip(order.payment_status)" />
+                  @if (showFulfillment(order)) {
+                    <app-status-chip [chip]="fulfillmentChip(order.fulfillment_status)" />
+                  }
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      @if (orders.value()?.length === 0) {
+        <app-empty-state icon="orders" message="Keine Bestellungen in dieser Ansicht." />
+      }
+    </div>
+  }
+</div>

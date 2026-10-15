@@ -9,9 +9,24 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ProductImage } from '../components/product-image';
 import { ProductAdminApi, ProductDraft, slugify } from './product-admin-api';
+import {
+  checkboxClass,
+  dangerButtonClass,
+  fieldClass,
+  hintClass,
+  labelClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+  textareaClass,
+  textButtonClass,
+} from './ui/classes';
+import { Icon } from './ui/icon';
+import { ListSkeleton } from './ui/list-skeleton';
+import { AdminPageHeader } from './ui/page-header';
+import { SectionCard } from './ui/section-card';
 
 interface OptionDraft {
   name: string;
@@ -20,7 +35,7 @@ interface OptionDraft {
 
 @Component({
   selector: 'app-admin-product-edit',
-  imports: [FormsModule, RouterLink, ProductImage],
+  imports: [FormsModule, ProductImage, Icon, ListSkeleton, AdminPageHeader, SectionCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './product-edit.html',
 })
@@ -53,6 +68,16 @@ export class AdminProductEdit {
   protected readonly uploading = signal(false);
   protected readonly message = signal<{ tone: 'ok' | 'error'; text: string } | null>(null);
   protected readonly confirmDelete = signal(false);
+
+  protected readonly fieldClass = fieldClass;
+  protected readonly textareaClass = textareaClass;
+  protected readonly labelClass = labelClass;
+  protected readonly hintClass = hintClass;
+  protected readonly checkboxClass = checkboxClass;
+  protected readonly primaryButtonClass = primaryButtonClass;
+  protected readonly secondaryButtonClass = secondaryButtonClass;
+  protected readonly dangerButtonClass = dangerButtonClass;
+  protected readonly textButtonClass = textButtonClass;
 
   protected readonly priceRappen = computed(() => {
     const value = Number(this.price().replace(',', '.'));

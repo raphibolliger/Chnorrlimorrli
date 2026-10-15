@@ -1,20 +1,15 @@
-<h1 class="text-2xl font-bold text-navy">Versandmethoden</h1>
-<p class="mt-1 text-sm text-ink/60">Änderungen gelten sofort im Checkout.</p>
+<app-admin-page-header title="Versand" subtitle="Änderungen gelten sofort an der Kasse" />
 
-@if (methods.isLoading() && !methods.hasValue()) {
-  <div class="mt-4 space-y-3" aria-hidden="true">
-    @for (placeholder of [1, 2, 3]; track placeholder) {
-      <div class="h-40 animate-pulse rounded-2xl bg-white/70"></div>
-    }
-  </div>
-} @else if (methods.error()) {
-  <p class="mt-4 rounded-2xl bg-red-50 p-4 text-red-800">
-    Die Versandmethoden konnten nicht geladen werden.
-  </p>
-} @else {
-  <div class="mt-4 space-y-4">
+<div class="grid gap-4 p-4 md:p-0">
+  @if (methods.isLoading() && !methods.hasValue()) {
+    <app-list-skeleton [rows]="3" />
+  } @else if (methods.error()) {
+    <p class="rounded-xl bg-danger-soft p-4 text-sm text-danger-strong">
+      Die Versandmethoden konnten nicht geladen werden.
+    </p>
+  } @else {
     @for (method of methods.value(); track method.id) {
       <app-shipping-method-form [method]="method" (saved)="methods.reload()" />
     }
-  </div>
-}
+  }
+</div>

@@ -1,62 +1,117 @@
-<div class="flex flex-wrap items-center justify-between gap-3">
-  <h1 class="text-2xl font-bold text-navy">Produkte</h1>
-  <a
-    routerLink="/admin/produkte/neu"
-    class="rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white"
-    >Neues Produkt</a
-  >
-</div>
+<app-admin-page-header title="Produkte" subtitle="Reihenfolge wie im Shop">
+  <a pageActions routerLink="/admin/produkte/neu" [class]="primaryButtonClass">
+    <app-icon name="plus" [size]="18" />
+    Neues Produkt
+  </a>
+</app-admin-page-header>
 
-@if (products.isLoading() && !products.hasValue()) {
-  <div class="mt-4 space-y-3" aria-hidden="true">
-    @for (placeholder of [1, 2, 3]; track placeholder) {
-      <div class="h-24 animate-pulse rounded-2xl bg-white/70"></div>
-    }
-  </div>
-} @else if (products.error()) {
-  <p class="mt-4 rounded-2xl bg-red-50 p-4 text-red-800">
-    Die Produkte konnten nicht geladen werden.
-  </p>
-} @else {
-  <ul class="mt-4 space-y-3">
-    @for (product of products.value(); track product.id) {
-      <li class="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-ink/5">
+<div class="p-4 md:p-0">
+  @if (products.isLoading() && !products.hasValue()) {
+    <app-list-skeleton [rows]="4" />
+  } @else if (products.error()) {
+    <p class="rounded-xl bg-danger-soft p-4 text-sm text-danger-strong">
+      Die Produkte konnten nicht geladen werden.
+    </p>
+  } @else {
+    <div class="grid gap-3 md:hidden">
+      @for (product of products.value(); track product.id) {
         <a
           [routerLink]="['/admin/produkte', product.id]"
-          class="relative size-16 shrink-0 overflow-hidden rounded-xl bg-parchment"
+          class="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-gray-200 active:bg-gray-50"
         >
-          @if (product.product_images[0]; as image) {
-            <app-product-image
-              [path]="image.storage_path"
-              [alt]="product.name"
-              imageClass="object-contain p-1"
-            />
+          <span class="relative size-16 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+            @if (product.product_images[0]; as image) {
+              <app-product-image
+                [path]="image.storage_path"
+                [alt]="product.name"
+                imageClass="object-contain p-1"
+              />
+            }
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block truncate font-medium">{{ product.name }}</span>
+            <span class="mt-0.5 block text-sm text-gray-500 tabular-nums"
+              >{{ product.price_rappen | chf }} · Lager {{ stockLabel(product) }}</span
+            >
+            <app-status-chip class="mt-1" [chip]="visibilityChip(product)" />
+          </span>
+        </a>
+      } @empty {
+        <app-empty-state icon="products" message="Noch keine Produkte." />
+      }
+    </div>
+
+    <div
+      class="hidden overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 md:block"
+    >
+      <table class="w-full table-fixed border-separate border-spacing-0 text-sm">
+        <colgroup>
+          <col class="w-16" />
+          <col />
+          <col class="w-24" />
+          <col class="w-28" />
+          <col class="w-28" />
+          <col class="w-40" />
+        </colgroup>
+        <thead>
+          <tr class="text-left text-xs font-medium tracking-wide text-gray-500 uppercase">
+            <th class="h-10 border-b border-gray-200 px-4"><span class="sr-only">Bild</span></th>
+            <th class="h-10 border-b border-gray-200 px-3">Produkt</th>
+            <th class="h-10 border-b border-gray-200 px-3">Art.-Nr.</th>
+            <th class="h-10 border-b border-gray-200 px-3 text-right">Preis</th>
+            <th class="h-10 border-b border-gray-200 px-3 text-right">Lager</th>
+            <th class="h-10 border-b border-gray-200 px-3">Im Shop</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products.value(); track product.id) {
+            <tr
+              class="cursor-pointer even:bg-gray-50 hover:bg-gray-100"
+              tabindex="0"
+              (click)="open(product)"
+              (keydown.enter)="open(product)"
+            >
+              <td class="border-b border-gray-100 px-4 py-2">
+                <span class="relative block size-10 overflow-hidden rounded-lg bg-gray-100">
+                  @if (product.product_images[0]; as image) {
+                    <app-product-image
+                      [path]="image.storage_path"
+                      [alt]="product.name"
+                      imageClass="object-contain p-0.5"
+                    />
+                  }
+                </span>
+              </td>
+              <td class="truncate border-b border-gray-100 px-3 font-medium">{{ product.name }}</td>
+              <td class="truncate border-b border-gray-100 px-3 font-mono text-gray-500">
+                {{ product.sku }}
+              </td>
+              <td class="border-b border-gray-100 px-3 text-right tabular-nums">
+                {{ product.price_rappen | chf }}
+              </td>
+              <td class="border-b border-gray-100 px-3 text-right tabular-nums">
+                {{ stockLabel(product) }}
+              </td>
+              <td class="border-b border-gray-100 px-3">
+                <button
+                  type="button"
+                  (click)="toggleActive(product, $event)"
+                  class="rounded-full"
+                  [attr.aria-label]="
+                    (product.active ? 'Ausblenden: ' : 'Einblenden: ') + product.name
+                  "
+                  title="Klicken zum Umschalten"
+                >
+                  <app-status-chip [chip]="visibilityChip(product)" />
+                </button>
+              </td>
+            </tr>
           }
-        </a>
-        <a [routerLink]="['/admin/produkte', product.id]" class="min-w-0 flex-1">
-          <p class="truncate font-semibold text-navy">{{ product.name }}</p>
-          <p class="text-sm text-ink/60">
-            {{ product.price_rappen | chf }}
-            @if (product.track_stock) {
-              · Lager {{ product.stock }}
-            }
-            @if (product.sku) {
-              · {{ product.sku }}
-            }
-          </p>
-        </a>
-        <button
-          type="button"
-          (click)="toggleActive(product)"
-          class="shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold"
-          [class]="product.active ? 'bg-green-100 text-green-800' : 'bg-ink/10 text-ink/60'"
-          [attr.aria-label]="(product.active ? 'Deaktivieren: ' : 'Aktivieren: ') + product.name"
-        >
-          {{ product.active ? 'Aktiv' : 'Inaktiv' }}
-        </button>
-      </li>
-    } @empty {
-      <li class="rounded-2xl bg-white p-6 text-center text-ink/60">Noch keine Produkte.</li>
-    }
-  </ul>
-}
+        </tbody>
+      </table>
+      @if (products.value()?.length === 0) {
+        <app-empty-state icon="products" message="Noch keine Produkte." />
+      }
+    </div>
+  }
+</div>

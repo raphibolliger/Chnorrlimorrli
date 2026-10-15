@@ -1,0 +1,19 @@
+<div class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-2">
+  @if (backLink(); as link) {
+    <a
+      [routerLink]="link"
+      class="-ml-2 inline-flex size-10 shrink-0 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100"
+      aria-label="Zurück"
+    >
+      <app-icon name="back" />
+    </a>
+  }
+  <div class="min-w-40 flex-1">
+    <h1 class="truncate text-xl font-semibold text-gray-900 md:text-2xl">{{ title() }}</h1>
+    @if (subtitle(); as text) {
+      <p class="truncate text-sm text-gray-500">{{ text }}</p>
+    }
+  </div>
+  <ng-content select="[pageActions]" />
+</div>
+<ng-content />

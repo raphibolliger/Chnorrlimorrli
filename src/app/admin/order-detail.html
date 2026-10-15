@@ -1,127 +1,128 @@
-<a
-  routerLink="/admin/bestellungen"
-  class="inline-flex items-center gap-2 text-sm font-semibold text-navy hover:underline"
-  ><span aria-hidden="true">←</span> Alle Bestellungen</a
->
-
 @if (order.isLoading() && !order.hasValue()) {
-  <div class="mt-4 h-64 animate-pulse rounded-2xl bg-white/70" aria-hidden="true"></div>
+  <app-admin-page-header title="Bestellung" backLink="/admin/bestellungen" />
+  <div class="p-4 md:p-0"><app-list-skeleton [rows]="3" /></div>
 } @else if (order.value(); as order) {
-  <div class="mt-3 flex flex-wrap items-center gap-3">
-    <h1 class="text-2xl font-bold text-navy">Bestellung #{{ order.order_number }}</h1>
-    <app-status-badge [payment]="order.payment_status" />
-    <app-status-badge [fulfillment]="order.fulfillment_status" />
-  </div>
-  <p class="mt-1 text-sm text-ink/60">{{ order.created_at | date: 'd.M.yyyy, HH:mm' }}</p>
+  <app-admin-page-header
+    [title]="'Bestellung #' + order.order_number"
+    [subtitle]="(order.created_at | date: 'dd.MM.yyyy, HH:mm') ?? ''"
+    backLink="/admin/bestellungen"
+  >
+    <div class="mt-2 flex flex-wrap gap-1">
+      <app-status-chip [chip]="paymentChip(order.payment_status)" />
+      <app-status-chip [chip]="fulfillmentChip(order.fulfillment_status)" />
+    </div>
+  </app-admin-page-header>
 
-  @if (feedback(); as feedback) {
-    <p
-      class="mt-4 rounded-2xl p-4 text-sm"
-      [class]="feedback.tone === 'ok' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'"
-      role="status"
-    >
-      {{ feedback.text }}
-    </p>
-  }
+  <div class="grid gap-4 p-4 md:grid-cols-2 md:p-0">
+    @if (feedback(); as feedback) {
+      <p
+        class="rounded-xl p-3 text-sm md:col-span-2"
+        [class]="
+          feedback.tone === 'ok'
+            ? 'bg-success-soft text-success-strong'
+            : 'bg-danger-soft text-danger-strong'
+        "
+        role="status"
+      >
+        {{ feedback.text }}
+      </p>
+    }
 
-  @if (actions().length > 0 || canCancel()) {
-    <section class="mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
-      <h2 class="font-semibold text-navy">Status ändern</h2>
-      @if (
-        order.shipping_kind === 'postal' &&
-        order.fulfillment_status !== 'shipped' &&
-        order.payment_status === 'paid'
-      ) {
-        <label class="mt-3 block">
-          <span class="text-sm font-semibold"
-            >Sendungsnummer
-            <span class="font-normal text-ink/60">(für «Versandt», freiwillig)</span></span
-          >
+    @if (actions().length > 0 || canCancel()) {
+      <app-section-card title="Status ändern" icon="edit" class="md:col-span-2">
+        @if (awaitsShipping()) {
+          <label class="mb-3 block max-w-sm">
+            <span [class]="labelClass"
+              >Sendungsnummer
+              <span class="font-normal text-gray-500">(für «Versandt», freiwillig)</span></span
+            >
+            <input
+              [class]="fieldClass"
+              [ngModel]="trackingNumber()"
+              (ngModelChange)="trackingNumber.set($event)"
+            />
+          </label>
+        }
+        <label class="mb-4 flex items-center gap-2 text-sm text-gray-700">
           <input
-            [ngModel]="trackingNumber()"
-            (ngModelChange)="trackingNumber.set($event)"
-            class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+            type="checkbox"
+            [class]="checkboxClass"
+            [ngModel]="notifyCustomer()"
+            (ngModelChange)="notifyCustomer.set($event)"
           />
+          Kundin oder Kunde per Mail informieren
         </label>
-      }
-      <label class="mt-3 flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          [ngModel]="notifyCustomer()"
-          (ngModelChange)="notifyCustomer.set($event)"
-          class="size-4 accent-navy"
-        />
-        Kundin oder Kunde per Mail informieren
-      </label>
-      <div class="mt-3 flex flex-wrap gap-2">
-        @for (step of actions(); track step.action) {
-          <button
-            type="button"
-            (click)="run(step.action)"
-            [disabled]="busy()"
-            class="rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {{ step.label }}
-          </button>
-        }
-        @if (canCancel() && !confirmCancel()) {
-          <button
-            type="button"
-            (click)="confirmCancel.set(true)"
-            [disabled]="busy()"
-            class="rounded-full px-4 py-2 text-sm font-semibold text-red-700 ring-1 ring-red-300"
-          >
-            Stornieren
-          </button>
-        }
-      </div>
-      @if (confirmCancel()) {
-        <div class="mt-3 rounded-2xl bg-red-50 p-4 text-sm text-red-900">
-          <p>
-            @if (order.payment_status === 'paid') {
-              Die Bestellung wird storniert und {{ order.total_rappen | chf }} werden über Stripe
-              zurückerstattet. Der Lagerbestand wird wieder erhöht.
-            } @else {
-              Die Bestellung wird storniert. Es wurde nichts bezahlt.
-            }
-          </p>
-          <div class="mt-3 flex gap-2">
+        <div class="flex flex-wrap gap-2">
+          @for (step of actions(); track step.action) {
             <button
               type="button"
-              (click)="run('cancel')"
+              (click)="run(step.action)"
               [disabled]="busy()"
-              class="rounded-full bg-red-700 px-4 py-2 font-semibold text-white"
+              [class]="primaryButtonClass"
             >
-              Ja, stornieren
+              {{ step.label }}
             </button>
+          }
+          @if (canCancel() && !confirmCancel()) {
             <button
               type="button"
-              (click)="confirmCancel.set(false)"
-              class="rounded-full px-4 py-2 font-semibold ring-1 ring-red-300"
+              (click)="confirmCancel.set(true)"
+              [disabled]="busy()"
+              [class]="secondaryButtonClass"
             >
-              Abbrechen
+              Stornieren
             </button>
-          </div>
+          }
         </div>
-      }
-    </section>
-  }
+        @if (confirmCancel()) {
+          <div class="mt-4 rounded-xl bg-danger-soft p-4 text-sm text-danger-strong">
+            <p>
+              @if (order.payment_status === 'paid') {
+                Die Bestellung wird storniert und {{ order.total_rappen | chf }} werden über Stripe
+                zurückerstattet. Der Lagerbestand wird wieder erhöht.
+              } @else {
+                Die Bestellung wird storniert. Es wurde nichts bezahlt.
+              }
+            </p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                (click)="run('cancel')"
+                [disabled]="busy()"
+                [class]="dangerButtonClass"
+              >
+                Ja, stornieren
+              </button>
+              <button
+                type="button"
+                (click)="confirmCancel.set(false)"
+                [class]="secondaryButtonClass"
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        }
+      </app-section-card>
+    }
 
-  <div class="mt-4 grid gap-4 md:grid-cols-2">
-    <section class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
-      <h2 class="font-semibold text-navy">Kontakt</h2>
-      <p class="mt-2">{{ order.first_name }} {{ order.last_name }}</p>
-      <a [href]="'mailto:' + order.email" class="block text-navy underline">{{ order.email }}</a>
+    <app-section-card title="Kontakt" icon="user">
+      <p class="font-medium">{{ order.first_name }} {{ order.last_name }}</p>
+      <a [href]="'mailto:' + order.email" class="mt-1 block text-sm text-info hover:underline">{{
+        order.email
+      }}</a>
       @if (order.phone) {
-        <a [href]="'tel:' + order.phone" class="block text-navy underline">{{ order.phone }}</a>
+        <a [href]="'tel:' + order.phone" class="mt-1 block text-sm text-info hover:underline">{{
+          order.phone
+        }}</a>
       }
-    </section>
-    <section class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
-      <h2 class="font-semibold text-navy">{{ order.shipping_name }}</h2>
+    </app-section-card>
+
+    <app-section-card [title]="order.shipping_name" icon="shipping">
       @if (order.shipping_kind === 'pickup') {
-        <p class="mt-2 text-ink/70">Abholung in Villmergen</p>
+        <p class="text-sm text-gray-600">Abholung in Villmergen</p>
       } @else {
-        <p class="mt-2">
+        <p class="text-sm leading-relaxed">
           {{ order.first_name }} {{ order.last_name }}<br />{{ order.street }}<br />{{
             order.postal_code
           }}
@@ -130,71 +131,77 @@
       }
       @if (order.tracking_number) {
         <p class="mt-2 text-sm">
-          Sendungsnummer: <strong>{{ order.tracking_number }}</strong>
+          <span class="text-gray-500">Sendungsnummer</span>
+          <span class="ml-1 font-mono">{{ order.tracking_number }}</span>
         </p>
       }
-    </section>
+    </app-section-card>
+
+    <app-section-card title="Artikel" icon="box" class="md:col-span-2">
+      <ul class="divide-y divide-gray-100">
+        @for (item of order.order_items; track item.id) {
+          <li class="flex justify-between gap-3 py-2 text-sm first:pt-0">
+            <span class="min-w-0">
+              <span class="font-medium">{{ item.quantity }} × {{ item.product_name }}</span>
+              @if (item.sku) {
+                <span class="font-mono text-xs text-gray-500"> {{ item.sku }}</span>
+              }
+              @for (option of $any(item.options) | keyvalue; track option.key) {
+                <span class="block text-gray-500">{{ option.key }}: {{ option.value }}</span>
+              }
+            </span>
+            <span class="shrink-0 tabular-nums">{{ item.line_total_rappen | chf }}</span>
+          </li>
+        }
+      </ul>
+      <dl class="mt-2 space-y-1 border-t border-gray-100 pt-3 text-sm">
+        <div class="flex justify-between">
+          <dt class="text-gray-500">Zwischensumme</dt>
+          <dd class="tabular-nums">{{ order.subtotal_rappen | chf }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-gray-500">Versand</dt>
+          <dd class="tabular-nums">
+            {{ order.shipping_rappen === 0 ? 'kostenlos' : (order.shipping_rappen | chf) }}
+          </dd>
+        </div>
+        <div class="flex justify-between font-semibold">
+          <dt>Total</dt>
+          <dd class="tabular-nums">{{ order.total_rappen | chf }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-gray-500">Bezahlt mit</dt>
+          <dd>{{ paymentMethodLabel(order.payment_method) }}</dd>
+        </div>
+      </dl>
+      @if (order.customer_note) {
+        <p class="mt-3 rounded-xl bg-warning-soft p-3 text-sm text-warning-strong">
+          <span class="font-medium">Bemerkung:</span> {{ order.customer_note }}
+        </p>
+      }
+    </app-section-card>
+
+    <app-section-card title="Verlauf" icon="history" class="md:col-span-2">
+      <ul class="space-y-2 text-sm">
+        @for (event of order.order_events; track event.id) {
+          <li class="flex gap-3">
+            <span class="w-28 shrink-0 text-gray-500 tabular-nums">{{
+              event.created_at | date: 'dd.MM., HH:mm'
+            }}</span>
+            <span class="min-w-0">
+              {{ eventLabel(event.kind) }}
+              @if (event.detail) {
+                <span class="text-gray-500">· {{ event.detail }}</span>
+              }
+            </span>
+          </li>
+        }
+      </ul>
+    </app-section-card>
   </div>
-
-  <section class="mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
-    <h2 class="font-semibold text-navy">Artikel</h2>
-    <ul class="mt-2 divide-y divide-ink/10">
-      @for (item of order.order_items; track item.id) {
-        <li class="flex justify-between gap-3 py-2 text-sm">
-          <span>
-            <span class="font-semibold">{{ item.quantity }} × {{ item.product_name }}</span>
-            @if (item.sku) {
-              <span class="text-ink/50"> ({{ item.sku }})</span>
-            }
-            @for (option of $any(item.options) | keyvalue; track option.key) {
-              <span class="block text-ink/60">{{ option.key }}: {{ option.value }}</span>
-            }
-          </span>
-          <span class="shrink-0">{{ item.line_total_rappen | chf }}</span>
-        </li>
-      }
-    </ul>
-    <dl class="mt-2 space-y-1 border-t border-ink/10 pt-2 text-sm">
-      <div class="flex justify-between">
-        <dt>Zwischensumme</dt>
-        <dd>{{ order.subtotal_rappen | chf }}</dd>
-      </div>
-      <div class="flex justify-between">
-        <dt>Versand</dt>
-        <dd>{{ order.shipping_rappen === 0 ? 'kostenlos' : (order.shipping_rappen | chf) }}</dd>
-      </div>
-      <div class="flex justify-between font-bold">
-        <dt>Total</dt>
-        <dd>{{ order.total_rappen | chf }}</dd>
-      </div>
-      <div class="flex justify-between text-ink/60">
-        <dt>Bezahlt mit</dt>
-        <dd>{{ paymentMethodLabel(order.payment_method) }}</dd>
-      </div>
-    </dl>
-    @if (order.customer_note) {
-      <p class="mt-3 rounded-xl bg-mais-50 p-3 text-sm">
-        <strong>Bemerkung:</strong> {{ order.customer_note }}
-      </p>
-    }
-  </section>
-
-  <section class="mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
-    <h2 class="font-semibold text-navy">Verlauf</h2>
-    <ul class="mt-2 space-y-1 text-sm">
-      @for (event of order.order_events; track event.id) {
-        <li class="flex gap-3">
-          <span class="shrink-0 text-ink/50">{{ event.created_at | date: 'd.M., HH:mm' }}</span>
-          <span>
-            {{ eventLabel(event.kind) }}
-            @if (event.detail) {
-              <span class="text-ink/60">· {{ event.detail }}</span>
-            }
-          </span>
-        </li>
-      }
-    </ul>
-  </section>
 } @else {
-  <p class="mt-4 rounded-2xl bg-white p-6">Bestellung nicht gefunden.</p>
+  <app-admin-page-header title="Bestellung" backLink="/admin/bestellungen" />
+  <p class="m-4 rounded-xl bg-white p-6 text-sm shadow-sm ring-1 ring-gray-200 md:m-0">
+    Bestellung nicht gefunden.
+  </p>
 }

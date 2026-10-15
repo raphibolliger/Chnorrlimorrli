@@ -1,147 +1,152 @@
-<form
-  class="space-y-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/5"
-  (submit)="$event.preventDefault(); save()"
->
-  <div class="flex flex-wrap items-center justify-between gap-2">
-    <h2 class="text-lg font-semibold text-navy">{{ method().name }}</h2>
-    <span class="rounded-full bg-mais-100 px-3 py-1 text-xs font-semibold text-navy">{{
-      kindLabel()
-    }}</span>
-  </div>
-
-  <div class="grid gap-4 sm:grid-cols-[1fr_minmax(0,120px)]">
-    <label class="block">
-      <span class="text-sm font-semibold">Name an der Kasse</span>
-      <input
-        name="name"
-        [ngModel]="name()"
-        (ngModelChange)="name.set($event)"
-        class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
-      />
-    </label>
-    <label class="block">
-      <span class="text-sm font-semibold">Reihenfolge</span>
-      <input
-        name="sortOrder"
-        type="number"
-        [ngModel]="sortOrder()"
-        (ngModelChange)="sortOrder.set($event)"
-        class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
-      />
-    </label>
-  </div>
-
-  <label class="block">
-    <span class="text-sm font-semibold">Beschreibung für Kundinnen und Kunden</span>
-    <textarea
-      name="description"
-      rows="2"
-      [ngModel]="description()"
-      (ngModelChange)="description.set($event)"
-      class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
-    ></textarea>
-  </label>
-
-  <label class="flex items-center gap-2">
-    <input
-      type="checkbox"
-      name="active"
-      [ngModel]="active()"
-      (ngModelChange)="active.set($event)"
-      class="size-5 accent-navy"
-    />
-    <span class="font-semibold">An der Kasse anbieten</span>
-  </label>
-
-  <fieldset class="space-y-2">
-    <legend class="text-sm font-semibold">Preisstufen nach Warenwert</legend>
-    @for (rate of rates(); track $index; let index = $index) {
-      <div class="flex flex-wrap items-center gap-2 text-sm">
-        <span>ab CHF</span>
-        <input
-          [ngModel]="rate.from"
-          (ngModelChange)="updateRate(index, 'from', $event)"
-          [ngModelOptions]="{ standalone: true }"
-          inputmode="decimal"
-          aria-label="Warenwert ab CHF"
-          class="w-24 rounded-xl border-0 bg-cream px-3 py-2 ring-1 ring-ink/15"
-        />
-        <span>kostet CHF</span>
-        <input
-          [ngModel]="rate.price"
-          (ngModelChange)="updateRate(index, 'price', $event)"
-          [ngModelOptions]="{ standalone: true }"
-          inputmode="decimal"
-          aria-label="Versandkosten CHF"
-          class="w-24 rounded-xl border-0 bg-cream px-3 py-2 ring-1 ring-ink/15"
-        />
-        @if (rates().length > 1) {
-          <button type="button" (click)="removeRate(index)" class="font-semibold text-red-700">
-            Entfernen
-          </button>
-        }
-      </div>
-    }
-    <button type="button" (click)="addRate()" class="text-sm font-semibold text-navy underline">
-      Preisstufe hinzufügen
-    </button>
-  </fieldset>
-
-  @if (method().kind === 'local_delivery') {
-    <label class="block">
-      <span class="text-sm font-semibold">Liefergebiet (Postleitzahlen)</span>
-      <textarea
-        name="postalCodes"
-        rows="4"
-        [ngModel]="postalCodes()"
-        (ngModelChange)="postalCodes.set($event)"
-        class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 font-mono text-sm ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
-      ></textarea>
-      <span class="mt-1 block text-xs text-ink/60"
-        >{{ parsedPostalCodes().length }} gültige Postleitzahlen, getrennt mit Komma, Leerzeichen
-        oder Zeilenumbruch.</span
-      >
-    </label>
-  }
-
-  @if (method().kind === 'pickup') {
-    <div class="grid gap-4 sm:grid-cols-2">
+<app-section-card [title]="method().name" [icon]="kindIcon()" [subtitle]="kindLabel()">
+  <form class="grid gap-4" (submit)="$event.preventDefault(); save()">
+    <div class="grid gap-4 md:grid-cols-[1fr_minmax(0,140px)]">
       <label class="block">
-        <span class="text-sm font-semibold">Abholort</span>
+        <span [class]="labelClass">Name an der Kasse</span>
         <input
-          name="pickupLocation"
-          [ngModel]="pickupLocation()"
-          (ngModelChange)="pickupLocation.set($event)"
-          class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+          name="name"
+          [class]="fieldClass"
+          [ngModel]="name()"
+          (ngModelChange)="name.set($event)"
         />
       </label>
       <label class="block">
-        <span class="text-sm font-semibold">Öffnungszeiten</span>
+        <span [class]="labelClass">Reihenfolge</span>
         <input
-          name="pickupHours"
-          [ngModel]="pickupHours()"
-          (ngModelChange)="pickupHours.set($event)"
-          class="mt-1 w-full rounded-xl border-0 bg-cream px-4 py-2.5 ring-1 ring-ink/15 focus:ring-2 focus:ring-navy"
+          name="sortOrder"
+          type="number"
+          [class]="fieldClass"
+          [ngModel]="sortOrder()"
+          (ngModelChange)="sortOrder.set($event)"
         />
       </label>
     </div>
-  }
 
-  @if (message(); as message) {
-    <p
-      class="rounded-2xl p-3 text-sm"
-      [class]="message.tone === 'ok' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'"
-      role="status"
-    >
-      {{ message.text }}
-    </p>
-  }
+    <label class="block">
+      <span [class]="labelClass">Beschreibung für Kundinnen und Kunden</span>
+      <textarea
+        name="description"
+        rows="2"
+        [class]="textareaClass"
+        [ngModel]="description()"
+        (ngModelChange)="description.set($event)"
+      ></textarea>
+    </label>
 
-  <button
-    type="submit"
-    [disabled]="saving()"
-    class="rounded-full bg-navy px-5 py-2.5 font-semibold text-white disabled:opacity-60"
-  >
-    {{ saving() ? 'Speichern …' : 'Speichern' }}
-  </button>
-</form>
+    <label class="flex items-center gap-2 text-sm font-medium text-gray-800">
+      <input
+        type="checkbox"
+        name="active"
+        [class]="checkboxClass"
+        [ngModel]="active()"
+        (ngModelChange)="active.set($event)"
+      />
+      An der Kasse anbieten
+    </label>
+
+    <fieldset class="grid gap-2">
+      <legend [class]="labelClass">Preisstufen nach Warenwert</legend>
+      @for (rate of rates(); track $index; let index = $index) {
+        <div
+          class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] items-end gap-2 md:max-w-lg"
+        >
+          <label class="block">
+            <span [class]="hintClass + ' mt-0 mb-1'">Warenwert ab CHF</span>
+            <input
+              [class]="fieldClass"
+              [ngModel]="rate.from"
+              (ngModelChange)="updateRate(index, 'from', $event)"
+              [ngModelOptions]="{ standalone: true }"
+              inputmode="decimal"
+            />
+          </label>
+          <label class="block">
+            <span [class]="hintClass + ' mt-0 mb-1'">Versandkosten CHF</span>
+            <input
+              [class]="fieldClass"
+              [ngModel]="rate.price"
+              (ngModelChange)="updateRate(index, 'price', $event)"
+              [ngModelOptions]="{ standalone: true }"
+              inputmode="decimal"
+            />
+          </label>
+          @if (rates().length > 1) {
+            <button
+              type="button"
+              (click)="removeRate(index)"
+              class="inline-flex size-10 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-danger"
+              aria-label="Preisstufe entfernen"
+            >
+              <app-icon name="trash" [size]="18" />
+            </button>
+          }
+        </div>
+      }
+      <button type="button" (click)="addRate()" [class]="textButtonClass + ' justify-self-start'">
+        <app-icon name="plus" [size]="18" />
+        Preisstufe hinzufügen
+      </button>
+    </fieldset>
+
+    @if (method().kind === 'local_delivery') {
+      <label class="block">
+        <span [class]="labelClass">Liefergebiet (Postleitzahlen)</span>
+        <textarea
+          name="postalCodes"
+          rows="4"
+          [class]="textareaClass + ' font-mono'"
+          [ngModel]="postalCodes()"
+          (ngModelChange)="postalCodes.set($event)"
+        ></textarea>
+        <span [class]="hintClass"
+          >{{ parsedPostalCodes().length }} gültige Postleitzahlen, getrennt mit Komma, Leerzeichen
+          oder Zeilenumbruch.</span
+        >
+      </label>
+    }
+
+    @if (method().kind === 'pickup') {
+      <div class="grid gap-4 md:grid-cols-2">
+        <label class="block">
+          <span [class]="labelClass">Abholort</span>
+          <input
+            name="pickupLocation"
+            [class]="fieldClass"
+            [ngModel]="pickupLocation()"
+            (ngModelChange)="pickupLocation.set($event)"
+          />
+        </label>
+        <label class="block">
+          <span [class]="labelClass">Öffnungszeiten</span>
+          <input
+            name="pickupHours"
+            [class]="fieldClass"
+            [ngModel]="pickupHours()"
+            (ngModelChange)="pickupHours.set($event)"
+          />
+        </label>
+      </div>
+    }
+
+    @if (message(); as message) {
+      <p
+        class="rounded-xl p-3 text-sm"
+        [class]="
+          message.tone === 'ok'
+            ? 'bg-success-soft text-success-strong'
+            : 'bg-danger-soft text-danger-strong'
+        "
+        role="status"
+      >
+        {{ message.text }}
+      </p>
+    }
+
+    <div class="flex justify-end">
+      <button type="submit" [disabled]="saving()" [class]="primaryButtonClass">
+        <app-icon name="check" [size]="18" />
+        {{ saving() ? 'Speichern …' : 'Speichern' }}
+      </button>
+    </div>
+  </form>
+</app-section-card>

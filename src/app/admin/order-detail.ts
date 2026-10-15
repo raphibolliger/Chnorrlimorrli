@@ -9,10 +9,21 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { ChfPipe } from '../core/chf.pipe';
 import { AdminApi, OrderAction, paymentMethodLabel } from './admin-api';
-import { StatusBadge } from './status-badge';
+import { fulfillmentChip, paymentChip } from './order-chips';
+import {
+  checkboxClass,
+  dangerButtonClass,
+  fieldClass,
+  labelClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+} from './ui/classes';
+import { ListSkeleton } from './ui/list-skeleton';
+import { AdminPageHeader } from './ui/page-header';
+import { SectionCard } from './ui/section-card';
+import { StatusChip } from './ui/status-chip';
 
 interface ActionButton {
   action: OrderAction;
@@ -38,7 +49,16 @@ const eventLabels: Record<string, string> = {
 
 @Component({
   selector: 'app-admin-order-detail',
-  imports: [DatePipe, KeyValuePipe, FormsModule, RouterLink, ChfPipe, StatusBadge],
+  imports: [
+    DatePipe,
+    KeyValuePipe,
+    FormsModule,
+    ChfPipe,
+    ListSkeleton,
+    AdminPageHeader,
+    SectionCard,
+    StatusChip,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './order-detail.html',
 })
@@ -57,6 +77,14 @@ export class AdminOrderDetail {
   protected readonly feedback = signal<{ tone: 'ok' | 'error'; text: string } | null>(null);
   protected readonly confirmCancel = signal(false);
   protected readonly paymentMethodLabel = paymentMethodLabel;
+  protected readonly paymentChip = paymentChip;
+  protected readonly fulfillmentChip = fulfillmentChip;
+  protected readonly fieldClass = fieldClass;
+  protected readonly labelClass = labelClass;
+  protected readonly checkboxClass = checkboxClass;
+  protected readonly primaryButtonClass = primaryButtonClass;
+  protected readonly secondaryButtonClass = secondaryButtonClass;
+  protected readonly dangerButtonClass = dangerButtonClass;
 
   protected readonly actions = computed<ActionButton[]>(() => {
     const order = this.order.value();
@@ -74,6 +102,15 @@ export class AdminOrderDetail {
       steps.push({ action: 'delivered', label: 'Geliefert', mail: true });
     }
     return steps.filter((step) => step.action !== order.fulfillment_status);
+  });
+
+  protected readonly awaitsShipping = computed(() => {
+    const order = this.order.value();
+    return (
+      order?.shipping_kind === 'postal' &&
+      order.payment_status === 'paid' &&
+      (order.fulfillment_status === 'new' || order.fulfillment_status === 'processing')
+    );
   });
 
   protected readonly canCancel = computed(() => {
