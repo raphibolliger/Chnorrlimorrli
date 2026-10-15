@@ -7,6 +7,7 @@ import { SiteImage } from './site-image';
 @Component({
   selector: 'app-site-header',
   imports: [RouterLink, RouterLinkActive, SiteImage],
+  host: { class: 'sticky top-0 z-40 block' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './site-header.html',
 })

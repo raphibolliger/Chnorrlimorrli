@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { PageIntro } from '../components/page-intro';
 import { SiteImage } from '../components/site-image';
 import { places } from '../content/places';
@@ -6,7 +7,7 @@ import { texts } from '../content/texts';
 
 @Component({
   selector: 'app-places',
-  imports: [PageIntro, SiteImage],
+  imports: [RouterLink, PageIntro, SiteImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './places.html',
 })

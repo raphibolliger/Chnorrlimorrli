@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { PageIntro } from '../components/page-intro';
 import { SiteImage } from '../components/site-image';
 import { YoutubeEmbed } from '../components/youtube-embed';
@@ -7,7 +8,7 @@ import { texts } from '../content/texts';
 
 @Component({
   selector: 'app-experiences',
-  imports: [PageIntro, SiteImage, YoutubeEmbed],
+  imports: [RouterLink, PageIntro, SiteImage, YoutubeEmbed],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './experiences.html',
 })
