@@ -106,7 +106,7 @@
               <div class="mt-4 space-y-3">
                 @for (method of methods(); track method.id) {
                   <label
-                    class="flex cursor-pointer items-start gap-3 rounded-2xl p-4 ring-1 transition"
+                    class="flex items-start gap-3 rounded-2xl p-4 ring-1 transition"
                     [class]="
                       form.controls.shippingMethodId.value === method.id
                         ? 'bg-mais-50 ring-2 ring-navy'

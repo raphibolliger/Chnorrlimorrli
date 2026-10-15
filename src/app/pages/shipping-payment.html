@@ -41,7 +41,7 @@
               }
               @if (method.kind === 'local_delivery' && method.postal_codes.length > 0) {
                 <details class="mt-3 text-sm">
-                  <summary class="cursor-pointer font-semibold text-navy">
+                  <summary class="font-semibold text-navy">
                     Liefergebiet ({{ method.postal_codes.length }} Postleitzahlen)
                   </summary>
                   <p class="mt-2 text-ink/70">{{ method.postal_codes.join(', ') }}</p>
