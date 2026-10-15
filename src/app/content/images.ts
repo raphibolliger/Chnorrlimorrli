@@ -6,7 +6,7 @@ export interface SiteImage {
 
 export const siteImages: Record<string, SiteImage> = {
   logo: { width: 192, height: 192, widths: [96, 192] },
-  'home/chnorrlimorrli': { width: 800, height: 902, widths: [480, 800] },
+  'home/chnorrlimorrli': { width: 622, height: 744, widths: [360, 560, 622] },
   'buecher/chnorrlimorrli-und-freunde': { width: 1131, height: 1599, widths: [480, 960, 1131] },
   'orte/karte': { width: 1600, height: 2176, widths: [480, 960, 1600] },
   'orte/hasenbergturm': { width: 1000, height: 750, widths: [480, 1000] },

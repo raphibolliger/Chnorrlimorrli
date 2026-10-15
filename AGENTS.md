@@ -49,3 +49,7 @@ Content is German (Swiss tone, never use ß, always ss).
 - Staging: https://raphibolliger.github.io/Chnorrlimorrli/
 - `.github/workflows/supabase.yml` applies migrations, sets function secrets and deploys edge functions on pushes to `main` that touch `supabase/`. Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_SMTP_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `ACS_CONNECTION_STRING`. Variables: `MAIL_REDIRECT_TO`, `MAIL_REPLY_TO`, `ADMIN_NOTIFICATION_TO`, `SITE_URL`, `ALLOWED_ORIGINS`.
 - `.github/workflows/keep-alive.yml` queries the Data API every two days so the free project is not paused.
+
+## Go-live
+
+The steps for switching `chnorrlimorrli.ch` from Ecwid to this project are in `docs/go-live.md`. They are executed only after an explicit OK.
