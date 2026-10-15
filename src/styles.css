@@ -23,6 +23,22 @@
   --color-cream: #fffaf0;
   --color-ink: #1d1d1f;
   --color-bark: #7a3e14;
+  --color-success: var(--color-green-600);
+  --color-success-soft: var(--color-green-50);
+  --color-success-muted: var(--color-green-100);
+  --color-success-strong: var(--color-green-800);
+  --color-info: var(--color-blue-600);
+  --color-info-soft: var(--color-blue-50);
+  --color-info-muted: var(--color-blue-100);
+  --color-info-strong: var(--color-blue-800);
+  --color-warning: var(--color-amber-500);
+  --color-warning-soft: var(--color-amber-50);
+  --color-warning-muted: var(--color-amber-100);
+  --color-warning-strong: var(--color-amber-800);
+  --color-danger: var(--color-red-600);
+  --color-danger-soft: var(--color-red-50);
+  --color-danger-muted: var(--color-red-100);
+  --color-danger-strong: var(--color-red-700);
   --font-display: 'Fredoka', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
   --font-sans:
     system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
@@ -43,5 +59,9 @@
 
   p {
     text-wrap: pretty;
+  }
+
+  .admin-ui :is(h1, h2, h3, h4) {
+    font-family: var(--font-sans);
   }
 }

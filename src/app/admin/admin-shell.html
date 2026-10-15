@@ -1,36 +1,118 @@
-<div class="min-h-dvh bg-cream">
-  <header class="sticky top-0 z-40 bg-navy text-white shadow">
-    <div class="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
-      <a routerLink="/admin" class="font-display text-lg font-semibold">
-        Chnorrlimorrli <span class="font-normal text-mais">Verwaltung</span>
+<header
+  class="sticky top-0 z-30 hidden h-14 items-center gap-4 border-b border-gray-200 bg-white px-6 md:flex"
+>
+  <a routerLink="/admin" class="flex shrink-0 items-center gap-2 rounded-md">
+    <app-site-image name="logo" alt="" sizes="28px" imageClass="size-7 rounded-full" />
+    <span class="text-sm font-semibold text-gray-900">Chnorrlimorrli</span>
+    <span class="text-sm text-gray-400">Verwaltung</span>
+  </a>
+  <nav class="flex min-w-0 flex-1 items-center gap-1" aria-label="Verwaltung">
+    @for (item of navigation; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive
+        #link="routerLinkActive"
+        [attr.aria-current]="link.isActive ? 'page' : null"
+        class="flex h-9 items-center gap-2 rounded-full px-3 text-sm whitespace-nowrap transition-colors"
+        [class]="
+          link.isActive
+            ? 'bg-gray-100 font-medium text-gray-900'
+            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+        "
+      >
+        <app-icon [name]="item.icon" />
+        {{ item.label }}
       </a>
-      <div class="flex items-center gap-2">
-        <a routerLink="/" class="hidden text-sm text-white/70 hover:text-white sm:inline"
-          >Zur Webseite</a
-        >
-        <button
-          type="button"
-          (click)="signOut()"
-          class="rounded-full px-3 py-1.5 text-sm font-semibold ring-1 ring-white/30 hover:bg-white/10"
-        >
-          Abmelden
-        </button>
-      </div>
-    </div>
-    <nav class="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-2 pb-2" aria-label="Verwaltung">
-      @for (item of navigation; track item.path) {
-        <a
-          [routerLink]="item.path"
-          routerLinkActive
-          ariaCurrentWhenActive="page"
-          class="shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold text-white/85 hover:bg-white/10 aria-[current=page]:bg-white aria-[current=page]:text-navy"
-          >{{ item.label }}</a
-        >
-      }
-    </nav>
-  </header>
-  <main class="mx-auto max-w-5xl px-4 py-6">
-    <router-outlet />
-  </main>
-  <p class="pb-6 text-center text-xs text-ink/50">Angemeldet als {{ auth.email() }}</p>
-</div>
+    }
+  </nav>
+  <a
+    routerLink="/"
+    class="flex h-9 items-center gap-2 rounded-full px-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+  >
+    <app-icon name="website" [size]="18" />
+    Webseite
+  </a>
+  <div class="flex items-center gap-2 border-l border-gray-200 pl-4">
+    <span class="flex size-8 items-center justify-center rounded-full bg-info-soft text-info">
+      <app-icon name="user" [size]="18" />
+    </span>
+    <span class="hidden max-w-48 truncate text-sm text-gray-600 lg:inline">{{ auth.email() }}</span>
+    <button
+      type="button"
+      (click)="signOut()"
+      class="flex size-9 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+      aria-label="Abmelden"
+      title="Abmelden"
+    >
+      <app-icon name="logout" [size]="18" />
+    </button>
+  </div>
+</header>
+
+<main
+  class="mx-auto w-full max-w-6xl pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:px-6 md:pb-10"
+>
+  <router-outlet />
+</main>
+
+<nav
+  class="fixed right-0 bottom-0 left-0 z-30 grid grid-cols-4 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
+  aria-label="Verwaltung"
+>
+  @for (item of navigation; track item.path) {
+    <a
+      [routerLink]="item.path"
+      routerLinkActive
+      #mobileLink="routerLinkActive"
+      [attr.aria-current]="mobileLink.isActive ? 'page' : null"
+      (click)="moreOpen.set(false)"
+      class="flex min-h-16 flex-col items-center justify-center gap-0.5 text-xs"
+      [class]="mobileLink.isActive ? 'font-semibold text-info' : 'text-gray-500'"
+    >
+      <app-icon [name]="item.icon" [size]="22" />
+      {{ item.label }}
+    </a>
+  }
+  <button
+    type="button"
+    (click)="moreOpen.update((open) => !open)"
+    class="flex min-h-16 flex-col items-center justify-center gap-0.5 text-xs"
+    [class]="moreOpen() ? 'font-semibold text-info' : 'text-gray-500'"
+    [attr.aria-expanded]="moreOpen()"
+  >
+    <app-icon name="more" [size]="22" />
+    Mehr
+  </button>
+</nav>
+
+@if (moreOpen()) {
+  <button
+    type="button"
+    class="fixed inset-0 z-30 bg-gray-900/20 md:hidden"
+    aria-label="Menü schliessen"
+    (click)="moreOpen.set(false)"
+  ></button>
+  <div
+    class="fixed right-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-40 w-64 rounded-xl bg-white p-1 shadow-lg ring-1 ring-gray-200 md:hidden"
+    role="menu"
+  >
+    <p class="truncate px-3 py-2 text-xs text-gray-500">{{ auth.email() }}</p>
+    <a
+      routerLink="/"
+      role="menuitem"
+      class="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm text-gray-800 hover:bg-gray-100"
+    >
+      <app-icon name="website" class="text-gray-500" />
+      Zur Webseite
+    </a>
+    <button
+      type="button"
+      role="menuitem"
+      (click)="signOut()"
+      class="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-gray-800 hover:bg-gray-100"
+    >
+      <app-icon name="logout" class="text-gray-500" />
+      Abmelden
+    </button>
+  </div>
+}

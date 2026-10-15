@@ -1,0 +1,15 @@
+<header class="flex flex-wrap items-center gap-3 p-4 md:flex-nowrap md:p-5">
+  <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-info-soft text-info">
+    <app-icon [name]="icon()" />
+  </span>
+  <div class="min-w-0 flex-1">
+    <h2 class="text-base font-semibold text-gray-900">{{ title() }}</h2>
+    @if (subtitle(); as text) {
+      <p class="text-sm text-gray-500">{{ text }}</p>
+    }
+  </div>
+  <ng-content select="[sectionActions]" />
+</header>
+<div class="border-t border-gray-100 p-4 md:p-5">
+  <ng-content />
+</div>

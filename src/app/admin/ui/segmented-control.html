@@ -1,0 +1,15 @@
+@for (item of items(); track item.label) {
+  <button
+    type="button"
+    class="flex min-h-11 grow items-center justify-center rounded-md px-3 whitespace-nowrap transition-colors md:min-h-8"
+    [class]="
+      item.selected
+        ? 'bg-white font-medium text-gray-900 shadow-sm'
+        : 'text-gray-600 hover:text-gray-900'
+    "
+    [attr.aria-pressed]="item.selected"
+    (click)="valueChange.emit(item.value)"
+  >
+    {{ item.label }}
+  </button>
+}

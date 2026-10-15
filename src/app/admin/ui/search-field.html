@@ -1,0 +1,13 @@
+<app-icon
+  name="search"
+  class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400"
+/>
+<input
+  #field
+  type="search"
+  class="min-h-11 w-full rounded-lg border border-gray-300 bg-white pr-3 pl-10 text-sm outline-none focus:border-info focus:ring-2 focus:ring-info-muted md:min-h-9"
+  [placeholder]="placeholder()"
+  [attr.aria-label]="placeholder()"
+  [value]="value()"
+  (input)="value.set(field.value)"
+/>

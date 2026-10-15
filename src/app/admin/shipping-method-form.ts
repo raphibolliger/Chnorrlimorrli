@@ -10,6 +10,18 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminShippingMethod, parsePostalCodes, ShippingAdminApi } from './shipping-admin-api';
+import {
+  checkboxClass,
+  fieldClass,
+  hintClass,
+  labelClass,
+  primaryButtonClass,
+  textareaClass,
+  textButtonClass,
+} from './ui/classes';
+import { Icon } from './ui/icon';
+import { SectionCard } from './ui/section-card';
+import { IconName } from './ui/tones';
 
 interface RateDraft {
   from: string;
@@ -22,6 +34,12 @@ const kindLabels = {
   local_delivery: 'Lokale Lieferung',
 } as const;
 
+const kindIcons: Record<AdminShippingMethod['kind'], IconName> = {
+  pickup: 'store',
+  postal: 'mail',
+  local_delivery: 'shipping',
+};
+
 function francs(rappen: number): string {
   return (rappen / 100).toFixed(2);
 }
@@ -33,7 +51,7 @@ function rappen(value: string): number | null {
 
 @Component({
   selector: 'app-shipping-method-form',
-  imports: [FormsModule],
+  imports: [FormsModule, Icon, SectionCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shipping-method-form.html',
 })
@@ -44,6 +62,14 @@ export class ShippingMethodForm {
   private readonly api = inject(ShippingAdminApi);
 
   protected readonly kindLabel = computed(() => kindLabels[this.method().kind]);
+  protected readonly kindIcon = computed(() => kindIcons[this.method().kind]);
+  protected readonly fieldClass = fieldClass;
+  protected readonly textareaClass = textareaClass;
+  protected readonly labelClass = labelClass;
+  protected readonly hintClass = hintClass;
+  protected readonly checkboxClass = checkboxClass;
+  protected readonly primaryButtonClass = primaryButtonClass;
+  protected readonly textButtonClass = textButtonClass;
   protected readonly name = linkedSignal(() => this.method().name);
   protected readonly description = linkedSignal(() => this.method().description ?? '');
   protected readonly active = linkedSignal(() => this.method().active);
