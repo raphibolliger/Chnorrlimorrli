@@ -1,41 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { FunctionsHttpError } from '@supabase/supabase-js';
+import type { CheckoutRequest, OrderSummary } from '../../../supabase/functions/_shared/orders';
 import { Supabase } from './supabase';
 
-export interface CheckoutPayload {
-  items: { productId: string; quantity: number; options: Record<string, string> }[];
-  shippingMethodId: string;
-  customer: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    phone: string;
-    street: string;
-    postalCode: string;
-    city: string;
-  };
-  note: string;
-  termsAccepted: boolean;
-  returnBaseUrl: string;
-}
-
-export interface OrderSummary {
-  order_number: number;
-  payment_status: 'pending' | 'paid' | 'failed' | 'expired' | 'refunded';
-  first_name: string;
-  email: string;
-  shipping_kind: 'pickup' | 'postal' | 'local_delivery';
-  shipping_name: string;
-  subtotal_rappen: number;
-  shipping_rappen: number;
-  total_rappen: number;
-  order_items: {
-    product_name: string;
-    options: Record<string, string>;
-    quantity: number;
-    line_total_rappen: number;
-  }[];
-}
+export const checkoutFailed =
+  'Die Zahlung konnte nicht gestartet werden. Bitte versuche es später noch einmal.';
 
 export class CheckoutError extends Error {
   constructor(readonly messages: string[]) {
@@ -43,20 +12,30 @@ export class CheckoutError extends Error {
   }
 }
 
+async function errorMessages(error: unknown): Promise<string[]> {
+  if (error instanceof FunctionsHttpError) {
+    const body: { errors?: string[] } = await error.context.json().catch(() => ({}));
+    if (body.errors?.length) {
+      return body.errors;
+    }
+  }
+  return [checkoutFailed];
+}
+
 @Injectable({ providedIn: 'root' })
 export class CheckoutApi {
   private readonly supabase = inject(Supabase);
 
-  async startCheckout(payload: CheckoutPayload): Promise<string> {
+  async startCheckout(request: CheckoutRequest): Promise<string> {
     const { data, error } = await this.supabase.client.functions.invoke<{ url: string }>(
       'create-checkout',
-      { body: payload },
+      { body: request },
     );
     if (error) {
-      throw new CheckoutError(await this.errorMessages(error));
+      throw new CheckoutError(await errorMessages(error));
     }
     if (!data?.url) {
-      throw new CheckoutError(['Die Zahlung konnte nicht gestartet werden.']);
+      throw new CheckoutError([checkoutFailed]);
     }
     return data.url;
   }
@@ -73,19 +52,5 @@ export class CheckoutApi {
       throw error;
     }
     return data;
-  }
-
-  private async errorMessages(error: unknown): Promise<string[]> {
-    if (error instanceof FunctionsHttpError) {
-      try {
-        const body = (await error.context.json()) as { errors?: string[] };
-        if (body.errors?.length) {
-          return body.errors;
-        }
-      } catch {
-        return ['Die Zahlung konnte nicht gestartet werden. Bitte versuche es später noch einmal.'];
-      }
-    }
-    return ['Die Zahlung konnte nicht gestartet werden. Bitte versuche es später noch einmal.'];
   }
 }

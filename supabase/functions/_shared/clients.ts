@@ -1,5 +1,8 @@
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import Stripe from 'npm:stripe@23';
+import type { Database } from './database.types.ts';
+
+export type AdminClient = SupabaseClient<Database>;
 
 function serviceKey(): string {
   const legacy = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -14,8 +17,8 @@ function serviceKey(): string {
   return key as string;
 }
 
-export function adminClient(): SupabaseClient {
-  return createClient(Deno.env.get('SUPABASE_URL')!, serviceKey(), {
+export function adminClient(): AdminClient {
+  return createClient<Database>(Deno.env.get('SUPABASE_URL')!, serviceKey(), {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }

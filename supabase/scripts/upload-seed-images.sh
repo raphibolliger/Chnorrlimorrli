@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${SUPABASE_URL:?SUPABASE_URL is required}"
-: "${SUPABASE_SERVICE_KEY:?SUPABASE_SERVICE_KEY is required}"
+if [[ -n "${PROJECT_REF:-}" ]]; then
+  SUPABASE_URL="https://$PROJECT_REF.supabase.co"
+  SUPABASE_SERVICE_KEY="$("$(dirname "$0")/remote-service-key.sh" "$PROJECT_REF")"
+else
+  : "${SUPABASE_URL:?SUPABASE_URL is required}"
+  : "${SUPABASE_SERVICE_KEY:?SUPABASE_SERVICE_KEY is required}"
+fi
 
 image_dir="$(dirname "$0")/../seed/product-images"
 

@@ -27,6 +27,7 @@ const order: OrderMail = {
   totalRappen: 6000,
   customerNote: 'Bitte <b>schnell</b>',
   paymentMethod: 'twint',
+  refunded: false,
   items: [
     { name: 'Chnorrlimorrli 2', options: {}, quantity: 1, lineTotalRappen: 4000 },
     {
@@ -36,6 +37,8 @@ const order: OrderMail = {
       lineTotalRappen: 1000,
     },
   ],
+  pickupLocation: null,
+  pickupHours: null,
   trackingNumber: '99.00.123456.12345678',
 };
 
@@ -110,7 +113,24 @@ Deno.test('status mails have their own subjects', () => {
   assertStringIncludes(orderShipped(order, 'x').text, '99.00.123456.12345678');
   assertStringIncludes(orderReadyForPickup(order, 'x').subject, 'zur Abholung bereit');
   assertStringIncludes(orderDelivered(order, 'x').subject, 'geliefert');
-  assertStringIncludes(orderCancelled(order, 'x', true).text, 'zurückerstattet');
-  assertStringIncludes(orderCancelled(order, 'x', false).text, 'kein Betrag');
+  assertStringIncludes(orderCancelled({ ...order, refunded: true }, 'x').text, 'zurückerstattet');
+  assertStringIncludes(orderCancelled(order, 'x').text, 'kein Betrag');
   assertStringIncludes(adminNewOrder(order, 'x').subject, 'Neue Bestellung 1001');
+});
+
+Deno.test('text mails contain plain text, html mails escaped text', () => {
+  const mail = orderReadyForPickup(
+    { ...order, shippingKind: 'pickup', pickupLocation: 'Bäckerei Huber & Co' },
+    'https://example.com',
+  );
+  assertStringIncludes(mail.text, 'Abholort: Bäckerei Huber & Co.');
+  assertStringIncludes(mail.html, 'Bäckerei Huber &amp; Co');
+});
+
+Deno.test('links keep their target in text mails', () => {
+  const mail = orderShipped(order, 'https://example.com');
+  assertStringIncludes(
+    mail.text,
+    'post.ch (https://service.post.ch/ekp-web/ui/entry/search/99.00.123456.12345678)',
+  );
 });

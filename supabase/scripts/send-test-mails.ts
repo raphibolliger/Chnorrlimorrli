@@ -33,6 +33,7 @@ const postalOrder: OrderMail = {
   totalRappen: 6000,
   customerNote: 'Testbestellung aus dem Mail-Test',
   paymentMethod: 'twint',
+  refunded: false,
   items: [
     {
       name: 'Chnorrlimorrli 2 – und die Könige des Freiamts',
@@ -47,6 +48,8 @@ const postalOrder: OrderMail = {
       lineTotalRappen: 1000,
     },
   ],
+  pickupLocation: null,
+  pickupHours: null,
   trackingNumber: '99.00.123456.12345678',
 };
 const pickupOrder: OrderMail = {
@@ -66,7 +69,7 @@ const mails = [
   orderShipped(postalOrder, siteUrl),
   orderReadyForPickup(pickupOrder, siteUrl),
   orderDelivered(postalOrder, siteUrl),
-  orderCancelled(postalOrder, siteUrl, true),
+  orderCancelled({ ...postalOrder, refunded: true }, siteUrl),
 ];
 
 const settings = { ...mailSettingsFromEnv(), redirectTo: undefined };

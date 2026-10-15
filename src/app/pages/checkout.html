@@ -123,9 +123,7 @@
                       <span class="flex flex-wrap items-baseline justify-between gap-2">
                         <span class="font-semibold">{{ method.name }}</span>
                         <span class="font-semibold">{{
-                          shippingPriceOf(method) === 0
-                            ? 'kostenlos'
-                            : (shippingPriceOf(method) | chf)
+                          shippingPriceOf(method) | shippingPrice
                         }}</span>
                       </span>
                       @if (method.description) {
@@ -244,7 +242,7 @@
             </div>
             <div class="flex justify-between">
               <dt>{{ selectedMethod()?.name ?? 'Versand' }}</dt>
-              <dd>{{ shippingRappen() === 0 ? 'kostenlos' : (shippingRappen() | chf) }}</dd>
+              <dd>{{ shippingRappen() | shippingPrice }}</dd>
             </div>
             <div class="flex justify-between border-t border-ink/10 pt-2 text-lg font-bold">
               <dt>Total</dt>

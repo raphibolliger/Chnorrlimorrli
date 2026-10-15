@@ -1,11 +1,14 @@
 <app-admin-page-header title="Produkte" subtitle="Reihenfolge wie im Shop">
-  <a pageActions routerLink="/admin/produkte/neu" [class]="primaryButtonClass">
+  <a pageActions routerLink="/admin/produkte/neu" class="admin-button-primary">
     <app-icon name="plus" [size]="18" />
     Neues Produkt
   </a>
 </app-admin-page-header>
 
-<div class="p-4 md:p-0">
+<div class="grid gap-3 p-4 md:p-0">
+  @if (notice(); as notice) {
+    <app-notice-banner [notice]="notice" />
+  }
   @if (products.isLoading() && !products.hasValue()) {
     <app-list-skeleton [rows]="4" />
   } @else if (products.error()) {

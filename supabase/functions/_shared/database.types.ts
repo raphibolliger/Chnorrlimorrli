@@ -382,6 +382,12 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"save_product":
+{ Args: { "p_id"?: string,"p_options": Json,"p_product": Json }; Returns: string
+                           },
+"save_shipping_method":
+{ Args: { "p_id": string,"p_method": Json,"p_rates": Json }; Returns: undefined
+                           },
 "set_fulfillment_status":
 { Args: { "p_order_id": string,"p_status": Database["public"]['Enums']["fulfillment_status"],"p_tracking_number": string }; Returns: {
               "cancelled_at": string | null,

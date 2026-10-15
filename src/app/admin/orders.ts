@@ -2,8 +2,8 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, resource, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ChfPipe } from '../core/chf.pipe';
-import { AdminApi, OrderFilter, OrderListEntry } from './admin-api';
-import { fulfillmentChip, paymentChip } from './order-chips';
+import { AdminApi, OrderListEntry, OrderView } from './admin-api';
+import { fulfillmentChips, paymentChips } from './order-chips';
 import { EmptyState } from './ui/empty-state';
 import { ListSkeleton } from './ui/list-skeleton';
 import { AdminPageHeader } from './ui/page-header';
@@ -31,16 +31,16 @@ export class AdminOrders {
   private readonly api = inject(AdminApi);
   private readonly router = inject(Router);
 
-  protected readonly views: SegmentOption<OrderFilter['view']>[] = [
+  protected readonly views: SegmentOption<OrderView>[] = [
     { value: 'open', label: 'Offen' },
     { value: 'done', label: 'Erledigt' },
     { value: 'all', label: 'Alle' },
     { value: 'unpaid', label: 'Nicht bezahlt' },
   ];
-  protected readonly view = signal<OrderFilter['view']>('open');
+  protected readonly view = signal<OrderView>('open');
   protected readonly search = signal('');
-  protected readonly paymentChip = paymentChip;
-  protected readonly fulfillmentChip = fulfillmentChip;
+  protected readonly paymentChips = paymentChips;
+  protected readonly fulfillmentChips = fulfillmentChips;
 
   protected readonly orders = resource({
     params: () => ({ view: this.view(), search: this.search() }),

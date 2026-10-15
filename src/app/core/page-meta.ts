@@ -1,33 +1,28 @@
-import { DOCUMENT } from '@angular/common';
-import { inject, Injectable } from '@angular/core';
-import { Meta } from '@angular/platform-browser';
-import { ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Meta, Title } from '@angular/platform-browser';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, TitleStrategy } from '@angular/router';
 
 const defaultDescription =
   'Halb Mensch, halb Monster und zu 100 Prozent ein Freiämter. Das Freiämter Kinderbuch Chnorrlimorrli.';
 
+function deepestRoute(route: ActivatedRouteSnapshot): ActivatedRouteSnapshot {
+  return route.firstChild ? deepestRoute(route.firstChild) : route;
+}
+
 @Injectable({ providedIn: 'root' })
-export class PageMeta {
+export class PageMeta extends TitleStrategy {
+  private readonly title = inject(Title);
   private readonly meta = inject(Meta);
-  private readonly router = inject(Router);
-  private readonly document = inject(DOCUMENT);
 
-  start(): void {
-    this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe(() => this.apply(this.router.routerState.snapshot.root));
-  }
-
-  private apply(root: ActivatedRouteSnapshot): void {
-    let route = root;
-    while (route.firstChild) {
-      route = route.firstChild;
+  override updateTitle(snapshot: RouterStateSnapshot): void {
+    const title = this.buildTitle(snapshot);
+    if (title !== undefined) {
+      this.title.setTitle(title);
     }
-    const description = (route.data['description'] as string | undefined) ?? defaultDescription;
-    const title = this.document.title;
+    const description: string =
+      deepestRoute(snapshot.root).data['description'] ?? defaultDescription;
     this.meta.updateTag({ name: 'description', content: description });
-    this.meta.updateTag({ property: 'og:title', content: title });
+    this.meta.updateTag({ property: 'og:title', content: this.title.getTitle() });
     this.meta.updateTag({ property: 'og:description', content: description });
   }
 }

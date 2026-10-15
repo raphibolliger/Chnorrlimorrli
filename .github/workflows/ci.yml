@@ -29,8 +29,8 @@ jobs:
         run: supabase db start
       - name: Generated types match the schema
         run: |
-          supabase gen types typescript --local > src/types/database.types.ts
-          git diff --exit-code src/types/database.types.ts
+          supabase gen types typescript --local > supabase/functions/_shared/database.types.ts
+          git diff --exit-code supabase/functions/_shared/database.types.ts
 
   functions:
     runs-on: ubuntu-latest
@@ -42,5 +42,5 @@ jobs:
       - name: Type-check and test edge functions
         working-directory: supabase/functions
         run: |
-          deno check */index.ts
+          deno check */index.ts ../scripts/send-test-mails.ts
           deno test --allow-env

@@ -4,4 +4,4 @@ node_modules
 coverage
 package-lock.json
 supabase/.temp
-src/types/database.types.ts
+supabase/functions/_shared/database.types.ts

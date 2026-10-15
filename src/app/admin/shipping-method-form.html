@@ -1,35 +1,35 @@
-<app-section-card [title]="method().name" [icon]="kindIcon()" [subtitle]="kindLabel()">
+<app-section-card [title]="method().name" [icon]="kind().icon" [subtitle]="kind().label">
   <form class="grid gap-4" (submit)="$event.preventDefault(); save()">
     <div class="grid gap-4 md:grid-cols-[1fr_minmax(0,140px)]">
       <label class="block">
-        <span [class]="labelClass">Name an der Kasse</span>
+        <span class="admin-label">Name an der Kasse</span>
         <input
           name="name"
-          [class]="fieldClass"
-          [ngModel]="name()"
-          (ngModelChange)="name.set($event)"
+          class="admin-field"
+          [ngModel]="form().name"
+          (ngModelChange)="patch('name', $event)"
         />
       </label>
       <label class="block">
-        <span [class]="labelClass">Reihenfolge</span>
+        <span class="admin-label">Reihenfolge</span>
         <input
           name="sortOrder"
           type="number"
-          [class]="fieldClass"
-          [ngModel]="sortOrder()"
-          (ngModelChange)="sortOrder.set($event)"
+          class="admin-field"
+          [ngModel]="form().sortOrder"
+          (ngModelChange)="patch('sortOrder', $event)"
         />
       </label>
     </div>
 
     <label class="block">
-      <span [class]="labelClass">Beschreibung für Kundinnen und Kunden</span>
+      <span class="admin-label">Beschreibung für Kundinnen und Kunden</span>
       <textarea
         name="description"
         rows="2"
-        [class]="textareaClass"
-        [ngModel]="description()"
-        (ngModelChange)="description.set($event)"
+        class="admin-textarea"
+        [ngModel]="form().description"
+        (ngModelChange)="patch('description', $event)"
       ></textarea>
     </label>
 
@@ -37,23 +37,23 @@
       <input
         type="checkbox"
         name="active"
-        [class]="checkboxClass"
-        [ngModel]="active()"
-        (ngModelChange)="active.set($event)"
+        class="admin-checkbox"
+        [ngModel]="form().active"
+        (ngModelChange)="patch('active', $event)"
       />
       An der Kasse anbieten
     </label>
 
     <fieldset class="grid gap-2">
-      <legend [class]="labelClass">Preisstufen nach Warenwert</legend>
-      @for (rate of rates(); track $index; let index = $index) {
+      <legend class="admin-label">Preisstufen nach Warenwert</legend>
+      @for (rate of form().rates; track $index; let index = $index) {
         <div
           class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] items-end gap-2 md:max-w-lg"
         >
           <label class="block">
-            <span [class]="hintClass + ' mt-0 mb-1'">Warenwert ab CHF</span>
+            <span class="mb-1 block text-xs text-gray-500">Warenwert ab CHF</span>
             <input
-              [class]="fieldClass"
+              class="admin-field"
               [ngModel]="rate.from"
               (ngModelChange)="updateRate(index, 'from', $event)"
               [ngModelOptions]="{ standalone: true }"
@@ -61,16 +61,16 @@
             />
           </label>
           <label class="block">
-            <span [class]="hintClass + ' mt-0 mb-1'">Versandkosten CHF</span>
+            <span class="mb-1 block text-xs text-gray-500">Versandkosten CHF</span>
             <input
-              [class]="fieldClass"
+              class="admin-field"
               [ngModel]="rate.price"
               (ngModelChange)="updateRate(index, 'price', $event)"
               [ngModelOptions]="{ standalone: true }"
               inputmode="decimal"
             />
           </label>
-          @if (rates().length > 1) {
+          @if (form().rates.length > 1) {
             <button
               type="button"
               (click)="removeRate(index)"
@@ -82,7 +82,7 @@
           }
         </div>
       }
-      <button type="button" (click)="addRate()" [class]="textButtonClass + ' justify-self-start'">
+      <button type="button" (click)="addRate()" class="admin-button-text justify-self-start">
         <app-icon name="plus" [size]="18" />
         Preisstufe hinzufügen
       </button>
@@ -90,15 +90,15 @@
 
     @if (method().kind === 'local_delivery') {
       <label class="block">
-        <span [class]="labelClass">Liefergebiet (Postleitzahlen)</span>
+        <span class="admin-label">Liefergebiet (Postleitzahlen)</span>
         <textarea
           name="postalCodes"
           rows="4"
-          [class]="textareaClass + ' font-mono'"
-          [ngModel]="postalCodes()"
-          (ngModelChange)="postalCodes.set($event)"
+          class="admin-textarea font-mono"
+          [ngModel]="form().postalCodes"
+          (ngModelChange)="patch('postalCodes', $event)"
         ></textarea>
-        <span [class]="hintClass"
+        <span class="admin-hint"
           >{{ parsedPostalCodes().length }} gültige Postleitzahlen, getrennt mit Komma, Leerzeichen
           oder Zeilenumbruch.</span
         >
@@ -108,42 +108,32 @@
     @if (method().kind === 'pickup') {
       <div class="grid gap-4 md:grid-cols-2">
         <label class="block">
-          <span [class]="labelClass">Abholort</span>
+          <span class="admin-label">Abholort</span>
           <input
             name="pickupLocation"
-            [class]="fieldClass"
-            [ngModel]="pickupLocation()"
-            (ngModelChange)="pickupLocation.set($event)"
+            class="admin-field"
+            [ngModel]="form().pickupLocation"
+            (ngModelChange)="patch('pickupLocation', $event)"
           />
         </label>
         <label class="block">
-          <span [class]="labelClass">Öffnungszeiten</span>
+          <span class="admin-label">Öffnungszeiten</span>
           <input
             name="pickupHours"
-            [class]="fieldClass"
-            [ngModel]="pickupHours()"
-            (ngModelChange)="pickupHours.set($event)"
+            class="admin-field"
+            [ngModel]="form().pickupHours"
+            (ngModelChange)="patch('pickupHours', $event)"
           />
         </label>
       </div>
     }
 
-    @if (message(); as message) {
-      <p
-        class="rounded-xl p-3 text-sm"
-        [class]="
-          message.tone === 'ok'
-            ? 'bg-success-soft text-success-strong'
-            : 'bg-danger-soft text-danger-strong'
-        "
-        role="status"
-      >
-        {{ message.text }}
-      </p>
+    @if (notice(); as notice) {
+      <app-notice-banner [notice]="notice" />
     }
 
     <div class="flex justify-end">
-      <button type="submit" [disabled]="saving()" [class]="primaryButtonClass">
+      <button type="submit" [disabled]="saving()" class="admin-button-primary">
         <app-icon name="check" [size]="18" />
         {{ saving() ? 'Speichern …' : 'Speichern' }}
       </button>

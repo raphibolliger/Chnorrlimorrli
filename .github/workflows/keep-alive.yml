@@ -14,10 +14,6 @@ jobs:
     steps:
       - name: Query the database through the Data API
         run: |
-          if [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
-            echo "SUPABASE_PUBLISHABLE_KEY is not set, ping skipped." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
           curl --fail --silent --show-error \
             "$SUPABASE_URL/rest/v1/shipping_methods?select=id&limit=1" \
-            -H "apikey: $SUPABASE_PUBLISHABLE_KEY" > /dev/null
+            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY:?SUPABASE_PUBLISHABLE_KEY is not set}" > /dev/null

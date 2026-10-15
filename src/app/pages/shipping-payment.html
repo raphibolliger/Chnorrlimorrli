@@ -14,11 +14,7 @@
                 <h3 class="text-xl font-semibold text-navy">{{ method.name }}</h3>
                 <p class="font-semibold">
                   @if (method.shipping_rates.length === 1) {
-                    @if (method.shipping_rates[0].price_rappen === 0) {
-                      kostenlos
-                    } @else {
-                      {{ method.shipping_rates[0].price_rappen | chf }}
-                    }
+                    {{ method.shipping_rates[0].price_rappen | shippingPrice }}
                   }
                 </p>
               </div>
@@ -30,9 +26,7 @@
                   @for (rate of method.shipping_rates; track rate.id; let last = $last) {
                     <li>
                       Warenwert ab {{ rate.from_subtotal_rappen | chf }}:
-                      <strong>{{
-                        rate.price_rappen === 0 ? 'kostenlos' : (rate.price_rappen | chf)
-                      }}</strong>
+                      <strong>{{ rate.price_rappen | shippingPrice }}</strong>
                     </li>
                   }
                 </ul>

@@ -1,74 +1,78 @@
-import { adminClient, Stripe, stripeClient } from '../_shared/clients.ts';
+import { AdminClient, adminClient, Stripe, stripeClient } from '../_shared/clients.ts';
 import { sendAdminNotification, sendCustomerMail } from '../_shared/order-mails.ts';
 
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
-async function paymentMethodOf(
-  stripe: Stripe,
-  paymentIntentId: string | null,
-): Promise<string | null> {
-  if (!paymentIntentId) {
-    return null;
-  }
+function idOf(reference: string | { id: string } | null): string | null {
+  return typeof reference === 'string' ? reference : (reference?.id ?? null);
+}
+
+async function paymentMethodOf(stripe: Stripe, paymentIntentId: string): Promise<string> {
   const intent = await stripe.paymentIntents.retrieve(paymentIntentId, {
     expand: ['latest_charge'],
   });
-  const charge = intent.latest_charge as Stripe.Charge | null;
-  const details = charge?.payment_method_details;
+  const details = (intent.latest_charge as Stripe.Charge | null)?.payment_method_details;
   if (!details) {
-    return intent.payment_method_types[0] ?? null;
+    return intent.payment_method_types[0];
   }
-  if (details.type === 'card' && details.card?.wallet?.type) {
-    return details.card.wallet.type;
-  }
-  return details.type;
+  return details.card?.wallet?.type ?? details.type;
 }
 
-async function markPaid(stripe: Stripe, session: Stripe.Checkout.Session): Promise<void> {
-  const supabase = adminClient();
-  const paymentIntentId =
-    typeof session.payment_intent === 'string'
-      ? session.payment_intent
-      : (session.payment_intent?.id ?? null);
-  const { data: order, error } = await supabase.rpc('mark_order_paid', {
-    p_session_id: session.id,
-    p_payment_intent_id: paymentIntentId,
-    p_payment_method: await paymentMethodOf(stripe, paymentIntentId),
-  });
-  if (error) {
-    throw error;
+async function markPaid(
+  supabase: AdminClient,
+  stripe: Stripe,
+  session: Stripe.Checkout.Session,
+): Promise<void> {
+  const paymentIntentId = idOf(session.payment_intent);
+  if (!paymentIntentId) {
+    throw new Error(`Paid checkout session ${session.id} has no payment intent`);
   }
+  const { data: order } = await supabase
+    .rpc('mark_order_paid', {
+      p_session_id: session.id,
+      p_payment_intent_id: paymentIntentId,
+      p_payment_method: await paymentMethodOf(stripe, paymentIntentId),
+    })
+    .throwOnError();
   if (!order?.id) {
     return;
   }
-  await sendCustomerMail(supabase, order.id, 'confirmation');
-  await sendAdminNotification(supabase, order.id);
+  await Promise.all([
+    sendCustomerMail(supabase, order.id, 'confirmation'),
+    sendAdminNotification(supabase, order.id),
+  ]);
 }
 
-async function markUnpaid(sessionId: string, status: 'expired' | 'failed'): Promise<void> {
-  const { error } = await adminClient().rpc('mark_order_unpaid', {
-    p_session_id: sessionId,
-    p_status: status,
-  });
-  if (error) {
-    throw error;
+async function markRefunded(supabase: AdminClient, charge: Stripe.Charge): Promise<void> {
+  const paymentIntentId = idOf(charge.payment_intent);
+  if (charge.refunded && paymentIntentId) {
+    await supabase
+      .rpc('mark_order_refunded', { p_payment_intent_id: paymentIntentId })
+      .throwOnError();
   }
 }
 
-async function markRefunded(charge: Stripe.Charge): Promise<void> {
-  if (!charge.refunded) {
-    return;
-  }
-  const paymentIntentId =
-    typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id;
-  if (!paymentIntentId) {
-    return;
-  }
-  const { error } = await adminClient().rpc('mark_order_refunded', {
-    p_payment_intent_id: paymentIntentId,
-  });
-  if (error) {
-    throw error;
+async function handle(supabase: AdminClient, stripe: Stripe, event: Stripe.Event): Promise<void> {
+  switch (event.type) {
+    case 'checkout.session.completed':
+    case 'checkout.session.async_payment_succeeded':
+      if (event.data.object.payment_status === 'paid') {
+        await markPaid(supabase, stripe, event.data.object);
+      }
+      break;
+    case 'checkout.session.async_payment_failed':
+      await supabase
+        .rpc('mark_order_unpaid', { p_session_id: event.data.object.id, p_status: 'failed' })
+        .throwOnError();
+      break;
+    case 'checkout.session.expired':
+      await supabase
+        .rpc('mark_order_unpaid', { p_session_id: event.data.object.id, p_status: 'expired' })
+        .throwOnError();
+      break;
+    case 'charge.refunded':
+      await markRefunded(supabase, event.data.object);
+      break;
   }
 }
 
@@ -98,23 +102,7 @@ Deno.serve(async (request) => {
   }
 
   try {
-    switch (event.type) {
-      case 'checkout.session.completed':
-      case 'checkout.session.async_payment_succeeded':
-        if (event.data.object.payment_status === 'paid') {
-          await markPaid(stripe, event.data.object);
-        }
-        break;
-      case 'checkout.session.async_payment_failed':
-        await markUnpaid(event.data.object.id, 'failed');
-        break;
-      case 'checkout.session.expired':
-        await markUnpaid(event.data.object.id, 'expired');
-        break;
-      case 'charge.refunded':
-        await markRefunded(event.data.object);
-        break;
-    }
+    await handle(adminClient(), stripe, event);
   } catch (error) {
     console.error(`handling ${event.type} failed`, error);
     return new Response('Webhook handling failed', { status: 500 });

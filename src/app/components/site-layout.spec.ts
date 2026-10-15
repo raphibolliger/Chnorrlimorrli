@@ -1,17 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { App } from './app';
+import { SiteLayout } from './site-layout';
 
-describe('App', () => {
+describe('SiteLayout', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [App],
+      imports: [SiteLayout],
       providers: [provideRouter([])],
     }).compileComponents();
   });
 
   it('renders header with brand and footer with contact', async () => {
-    const fixture = TestBed.createComponent(App);
+    const fixture = TestBed.createComponent(SiteLayout);
     await fixture.whenStable();
     const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelector('header')?.textContent).toContain('Chnorrlimorrli');

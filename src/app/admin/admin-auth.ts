@@ -1,6 +1,10 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Session } from '@supabase/supabase-js';
-import { Supabase } from './supabase';
+import { Supabase } from '../core/supabase';
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
 
 @Injectable({ providedIn: 'root' })
 export class AdminAuth {
@@ -19,7 +23,7 @@ export class AdminAuth {
 
   async requestCode(email: string): Promise<void> {
     const { error } = await this.supabase.client.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
+      email: normalizeEmail(email),
       options: { shouldCreateUser: false },
     });
     if (error && error.code !== 'otp_disabled' && error.code !== 'signup_disabled') {
@@ -29,7 +33,7 @@ export class AdminAuth {
 
   async verifyCode(email: string, token: string): Promise<boolean> {
     const { data, error } = await this.supabase.client.auth.verifyOtp({
-      email: email.trim().toLowerCase(),
+      email: normalizeEmail(email),
       token: token.trim(),
       type: 'email',
     });

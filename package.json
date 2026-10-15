@@ -9,7 +9,7 @@
     "test": "ng test --watch=false",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:types": "supabase gen types typescript --local > src/types/database.types.ts"
+    "db:types": "supabase gen types typescript --local > supabase/functions/_shared/database.types.ts"
   },
   "private": true,
   "packageManager": "npm@11.7.0",
