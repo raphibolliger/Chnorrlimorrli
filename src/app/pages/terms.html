@@ -43,24 +43,25 @@
         Lieferung per Post, durch den Hauslieferdienst des Vereins im Freiamt oder als Abholung in
         Villmergen nach Absprache. Details und Kosten stehen unter
         <a routerLink="/versand-und-zahlung" class="text-navy underline">Versand und Zahlung</a>.
-        <app-open-point text="Lieferfrist für den Postversand" />
+        Wir sind ein kleiner Verein und erledigen den Versand neben Familienalltag und weiteren
+        Verpflichtungen. Darum kann es manchmal etwas dauern. Wir geben uns Mühe, so schnell wie
+        möglich zu liefern.
       </p>
     </div>
 
     <div>
       <h2 class="text-2xl font-semibold text-navy">6. Rückgabe und Umtausch</h2>
       <p class="mt-3">
-        <app-open-point
-          text="Rückgaberegel festlegen, zum Beispiel Rückgabe ungelesener Bücher innert 14 Tagen"
-        />
+        Ein Rückgabe- oder Umtauschrecht besteht nicht. Bei beschädigten, fehlerhaften oder falsch
+        gelieferten Artikeln gilt Ziffer 7.
       </p>
     </div>
 
     <div>
       <h2 class="text-2xl font-semibold text-navy">7. Gewährleistung</h2>
       <p class="mt-3">
-        Bitte prüfe die Ware nach Erhalt. Beschädigte oder fehlerhafte Artikel melde uns bitte
-        innert 7 Tagen an
+        Bitte prüfe die Ware nach Erhalt. Beschädigte, fehlerhafte oder falsch gelieferte Artikel
+        melde uns bitte innert 7 Tagen an
         <a [href]="'mailto:' + contactEmail" class="text-navy underline">{{ contactEmail }}</a
         >. Wir ersetzen den Artikel oder erstatten den Kaufpreis.
       </p>
@@ -82,8 +83,6 @@
       </p>
     </div>
 
-    <p class="text-sm text-ink/60">
-      Stand: Oktober 2026. <app-open-point text="Prüfung der AGB durch den Verein" />
-    </p>
+    <p class="text-sm text-ink/60">Stand: Oktober 2026.</p>
   </div>
 </section>

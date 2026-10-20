@@ -6,11 +6,7 @@ Supabase-Projekt: `lisritbuqnjhdsguzrnu` · Repo-Variablen und Secrets: GitHub �
 
 ## 1. Vorbereitung (vor dem Termin)
 
-- [ ] Offene Angaben in den rechtlichen Seiten ergänzen (rot markiert mit `[OFFEN: …]`):
-  - Impressum: Strasse und Hausnummer des Vereins, vertretungsberechtigte Person
-  - Datenschutzerklärung: Strasse und Hausnummer, Prüfung durch den Verein
-  - AGB: Lieferfrist Postversand, Rückgaberegel, Prüfung durch den Verein
-  - Versand und Zahlung: Lieferfrist Postversand
+- [x] Offene Angaben in den rechtlichen Seiten ergänzt (Impressum, Datenschutzerklärung, AGB, Versand und Zahlung; #47)
 - [ ] Produkte, Preise, Texte und Bilder in der Verwaltung prüfen
 - [ ] Bild der «Freiämter Chnorrlimorrli-Socken» hochladen, falls das Produkt wieder aktiv wird
 - [ ] PLZ-Liste «Lieferung im Freiamt» prüfen
