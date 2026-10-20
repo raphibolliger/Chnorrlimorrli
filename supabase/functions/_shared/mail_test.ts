@@ -150,3 +150,10 @@ Deno.test('customer mails link to the order page, the admin mail does not', () =
   }
   assert(!adminNewOrder(order, 'https://example.com').text.includes(orderUrl));
 });
+
+Deno.test('the closing mail says abgeholt for pickups and geliefert otherwise', () => {
+  assertStringIncludes(orderDelivered(order, 'x').subject, 'wurde geliefert');
+  const pickup = orderDelivered({ ...order, shippingKind: 'pickup' }, 'x');
+  assertStringIncludes(pickup.subject, 'wurde abgeholt');
+  assertStringIncludes(pickup.text, 'Deine Bestellung 1001 wurde abgeholt.');
+});

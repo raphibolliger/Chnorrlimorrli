@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, resource, signal } from '@a
 import { Router, RouterLink } from '@angular/router';
 import { ChfPipe } from '../core/chf.pipe';
 import { AdminApi, OrderListEntry, OrderView } from './admin-api';
-import { fulfillmentChips, paymentChips } from './order-chips';
+import { fulfillmentChip, paymentChips } from './order-chips';
 import { EmptyState } from './ui/empty-state';
 import { ListSkeleton } from './ui/list-skeleton';
 import { AdminPageHeader } from './ui/page-header';
@@ -40,7 +40,7 @@ export class AdminOrders {
   protected readonly view = signal<OrderView>('open');
   protected readonly search = signal('');
   protected readonly paymentChips = paymentChips;
-  protected readonly fulfillmentChips = fulfillmentChips;
+  protected readonly fulfillmentChip = fulfillmentChip;
 
   protected readonly orders = resource({
     params: () => ({ view: this.view(), search: this.search() }),

@@ -64,7 +64,7 @@ export type OrderAction = FulfillmentAction | 'cancel';
 
 export const fulfillmentFlow: Record<ShippingKind, FulfillmentAction[]> = {
   pickup: ['processing', 'ready_for_pickup', 'delivered'],
-  postal: ['processing', 'shipped', 'delivered'],
+  postal: ['processing', 'shipped'],
   local_delivery: ['processing', 'delivered'],
 };
 

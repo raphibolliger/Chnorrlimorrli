@@ -303,11 +303,12 @@ export function orderReadyForPickup(order: OrderMail, siteUrl: string): MailCont
 }
 
 export function orderDelivered(order: OrderMail, siteUrl: string): MailContent {
+  const handedOver = order.shippingKind === 'pickup' ? 'abgeholt' : 'geliefert';
   return statusMail(order, siteUrl, {
-    subject: `Deine Bestellung ${order.orderNumber} wurde geliefert`,
+    subject: `Deine Bestellung ${order.orderNumber} wurde ${handedOver}`,
     headline: 'Viel Freude mit Chnorrlimorrli!',
     message: [
-      paragraph('Deine Bestellung ', bold(order.orderNumber), ' wurde geliefert.'),
+      paragraph('Deine Bestellung ', bold(order.orderNumber), ` wurde ${handedOver}.`),
       paragraph('Wir wünschen dir und deinen Kindern viel Freude beim Lesen und Entdecken.'),
     ],
   });

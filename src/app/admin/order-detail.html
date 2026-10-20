@@ -9,7 +9,7 @@
   >
     <div class="mt-2 flex flex-wrap gap-1">
       <app-status-chip [chip]="paymentChips[order.payment_status]" />
-      <app-status-chip [chip]="fulfillmentChips[order.fulfillment_status]" />
+      <app-status-chip [chip]="fulfillmentChip(order)" />
     </div>
   </app-admin-page-header>
 
