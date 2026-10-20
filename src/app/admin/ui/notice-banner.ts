@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Router } from '@angular/router';
 import { UserFacingError } from '../user-facing-error';
 
 export interface Notice {
@@ -16,6 +17,11 @@ export function danger(text: string): Notice {
 
 export function failure(error: unknown, fallback: string): Notice {
   return danger(error instanceof UserFacingError ? error.message : fallback);
+}
+
+export function navigationNotice(router: Router): Notice | null {
+  const text: string | undefined = router.currentNavigation()?.extras.state?.['notice'];
+  return text ? success(text) : null;
 }
 
 const toneClasses: Record<Notice['tone'], string> = {

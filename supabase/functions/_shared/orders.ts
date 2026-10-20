@@ -68,6 +68,23 @@ export const fulfillmentFlow: Record<ShippingKind, FulfillmentAction[]> = {
   local_delivery: ['processing', 'delivered'],
 };
 
+export const fulfillmentMailKinds: Record<
+  FulfillmentAction,
+  'ready_for_pickup' | 'shipped' | 'delivered' | null
+> = {
+  processing: null,
+  ready_for_pickup: 'ready_for_pickup',
+  shipped: 'shipped',
+  delivered: 'delivered',
+};
+
+export function sendsCustomerMail(
+  action: OrderAction,
+  order: Pick<TableRow<'orders'>, 'paid_at'>,
+): boolean {
+  return action === 'cancel' ? order.paid_at !== null : fulfillmentMailKinds[action] !== null;
+}
+
 export function fulfillmentStepLabel(status: FulfillmentAction, kind: ShippingKind): string {
   switch (status) {
     case 'processing':

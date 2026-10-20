@@ -9,14 +9,13 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import type { ShippingKind } from '../../../supabase/functions/_shared/orders';
 import { ShippingMethod } from '../core/shop-api';
 import { francsInput, parseFrancs } from './francs';
 import { parsePostalCodes, ShippingAdminApi } from './shipping-admin-api';
+import { shippingKinds } from './shipping-labels';
+import { AdminDialog } from './ui/dialog';
 import { Icon } from './ui/icon';
-import { danger, failure, Notice, NoticeBanner, success } from './ui/notice-banner';
-import { SectionCard } from './ui/section-card';
-import { IconName } from './ui/tones';
+import { danger, failure, Notice, NoticeBanner } from './ui/notice-banner';
 
 interface RateForm {
   from: string;
@@ -33,12 +32,6 @@ interface ShippingForm {
   pickupHours: string;
   rates: RateForm[];
 }
-
-const kinds: Record<ShippingKind, { label: string; icon: IconName }> = {
-  pickup: { label: 'Abholung', icon: 'store' },
-  postal: { label: 'Postversand', icon: 'mail' },
-  local_delivery: { label: 'Lokale Lieferung', icon: 'shipping' },
-};
 
 function toForm(method: ShippingMethod): ShippingForm {
   return {
@@ -57,19 +50,22 @@ function toForm(method: ShippingMethod): ShippingForm {
 }
 
 @Component({
-  selector: 'app-shipping-method-form',
-  imports: [FormsModule, Icon, NoticeBanner, SectionCard],
+  selector: 'app-shipping-method-dialog',
+  imports: [FormsModule, AdminDialog, Icon, NoticeBanner],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './shipping-method-form.html',
+  templateUrl: './shipping-method-dialog.html',
 })
-export class ShippingMethodForm {
+export class ShippingMethodDialog {
   readonly method = input.required<ShippingMethod>();
   readonly saved = output();
+  readonly dismissed = output();
 
   private readonly api = inject(ShippingAdminApi);
 
-  protected readonly kind = computed(() => kinds[this.method().kind]);
+  protected readonly kind = computed(() => shippingKinds[this.method().kind]);
   protected readonly form = linkedSignal(() => toForm(this.method()));
+  private readonly initialForm = computed(() => JSON.stringify(toForm(this.method())));
+  protected readonly dirty = computed(() => JSON.stringify(this.form()) !== this.initialForm());
   protected readonly saving = signal(false);
   protected readonly notice = signal<Notice | null>(null);
   protected readonly parsedPostalCodes = computed(() => parsePostalCodes(this.form().postalCodes));
@@ -135,7 +131,6 @@ export class ShippingMethodForm {
         pickup_hours: form.pickupHours,
         rates,
       });
-      this.notice.set(success('Gespeichert.'));
       this.saved.emit();
     } catch (error) {
       this.notice.set(failure(error, 'Die Versandmethode konnte nicht gespeichert werden.'));

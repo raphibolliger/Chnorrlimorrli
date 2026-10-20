@@ -3,22 +3,21 @@ import { Router, RouterLink } from '@angular/router';
 import { ProductImage } from '../components/product-image';
 import { ChfPipe } from '../core/chf.pipe';
 import { AdminProduct, ProductAdminApi } from './product-admin-api';
+import { ProductFormDialog } from './product-form-dialog';
+import { stockLabel, visibilityChip } from './product-labels';
 import { EmptyState } from './ui/empty-state';
 import { Icon } from './ui/icon';
 import { ListSkeleton } from './ui/list-skeleton';
-import { failure, Notice, NoticeBanner } from './ui/notice-banner';
+import { failure, navigationNotice, Notice, NoticeBanner } from './ui/notice-banner';
 import { AdminPageHeader } from './ui/page-header';
 import { StatusChip } from './ui/status-chip';
-import { Chip } from './ui/tones';
-
-const activeChip: Chip = { label: 'Sichtbar', icon: 'check', tone: 'success' };
-const inactiveChip: Chip = { label: 'Ausgeblendet', icon: 'close', tone: 'neutral' };
 
 @Component({
   selector: 'app-admin-products',
   imports: [
     RouterLink,
     ProductImage,
+    ProductFormDialog,
     ChfPipe,
     EmptyState,
     Icon,
@@ -35,14 +34,16 @@ export class AdminProducts {
   private readonly router = inject(Router);
 
   protected readonly products = resource({ loader: () => this.api.products() });
-  protected readonly notice = signal<Notice | null>(null);
+  protected readonly notice = signal<Notice | null>(navigationNotice(this.router));
+  protected readonly creating = signal(false);
 
-  protected visibilityChip(product: AdminProduct): Chip {
-    return product.active ? activeChip : inactiveChip;
-  }
+  protected readonly visibilityChip = visibilityChip;
+  protected readonly stockLabel = stockLabel;
 
-  protected stockLabel(product: AdminProduct): string {
-    return product.track_stock ? `${product.stock ?? 0} Stk.` : 'unbegrenzt';
+  protected created(id: string): void {
+    this.router.navigate(['/admin/produkte', id], {
+      state: { notice: 'Produkt erstellt. Jetzt kannst du Bilder hochladen.' },
+    });
   }
 
   protected open(product: AdminProduct): void {

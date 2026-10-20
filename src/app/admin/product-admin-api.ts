@@ -3,8 +3,10 @@ import type { TableRow } from '../../../supabase/functions/_shared/orders';
 import { Supabase } from '../core/supabase';
 import { UserFacingError } from './user-facing-error';
 
+export type AdminProductImage = TableRow<'product_images'>;
+
 export type AdminProduct = TableRow<'products'> & {
-  product_images: TableRow<'product_images'>[];
+  product_images: AdminProductImage[];
   product_options: TableRow<'product_options'>[];
 };
 

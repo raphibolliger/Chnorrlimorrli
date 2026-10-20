@@ -1,8 +1,8 @@
 <app-admin-page-header title="Produkte" subtitle="Reihenfolge wie im Shop">
-  <a pageActions routerLink="/admin/produkte/neu" class="admin-button-primary">
+  <button pageActions type="button" (click)="creating.set(true)" class="admin-button-primary">
     <app-icon name="plus" [size]="18" />
     Neues Produkt
-  </a>
+  </button>
 </app-admin-page-header>
 
 <div class="grid gap-3 p-4 md:p-0">
@@ -118,3 +118,11 @@
     </div>
   }
 </div>
+
+@if (creating()) {
+  <app-product-form-dialog
+    [product]="null"
+    (saved)="created($event)"
+    (dismissed)="creating.set(false)"
+  />
+}

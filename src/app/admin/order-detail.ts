@@ -8,7 +8,6 @@ import {
   resource,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import {
   fulfillmentFlow,
   fulfillmentStepLabel,
@@ -19,10 +18,11 @@ import {
 import { ChfPipe } from '../core/chf.pipe';
 import { ShippingPricePipe } from '../core/shipping-price.pipe';
 import { AdminApi } from './admin-api';
+import { OrderActionDialog } from './order-action-dialog';
 import { fulfillmentChips, paymentChips } from './order-chips';
 import { Icon } from './ui/icon';
 import { ListSkeleton } from './ui/list-skeleton';
-import { failure, Notice, NoticeBanner, success } from './ui/notice-banner';
+import { Notice, NoticeBanner, success } from './ui/notice-banner';
 import { AdminPageHeader } from './ui/page-header';
 import { SectionCard } from './ui/section-card';
 import { StatusChip } from './ui/status-chip';
@@ -48,9 +48,9 @@ const eventLabels: Record<string, string> = {
   imports: [
     DatePipe,
     KeyValuePipe,
-    FormsModule,
     ChfPipe,
     ShippingPricePipe,
+    OrderActionDialog,
     Icon,
     ListSkeleton,
     NoticeBanner,
@@ -70,11 +70,8 @@ export class AdminOrderDetail {
     params: () => this.id(),
     loader: ({ params }) => this.api.order(params),
   });
-  protected readonly trackingNumber = signal('');
-  protected readonly notifyCustomer = signal(true);
-  protected readonly busy = signal(false);
   protected readonly notice = signal<Notice | null>(null);
-  protected readonly confirmCancel = signal(false);
+  protected readonly pendingAction = signal<OrderAction | null>(null);
   protected readonly paymentMethodLabel = paymentMethodLabel;
   protected readonly paymentChips = paymentChips;
   protected readonly fulfillmentChips = fulfillmentChips;
@@ -87,15 +84,6 @@ export class AdminOrderDetail {
     return fulfillmentFlow[order.shipping_kind]
       .filter((action) => action !== order.fulfillment_status)
       .map((action) => ({ action, label: fulfillmentStepLabel(action, order.shipping_kind) }));
-  });
-
-  protected readonly awaitsShipping = computed(() => {
-    const order = this.order.value();
-    return (
-      order?.shipping_kind === 'postal' &&
-      order.payment_status === 'paid' &&
-      (order.fulfillment_status === 'new' || order.fulfillment_status === 'processing')
-    );
   });
 
   protected readonly orderPageUrl = computed(() => {
@@ -112,30 +100,14 @@ export class AdminOrderDetail {
     return eventLabels[kind] ?? kind;
   }
 
-  protected async run(action: OrderAction): Promise<void> {
-    const order = this.order.value();
-    if (!order) {
-      return;
-    }
-    this.busy.set(true);
+  protected startAction(action: OrderAction): void {
     this.notice.set(null);
-    try {
-      const result = await this.api.updateOrder({
-        orderId: order.id,
-        action,
-        trackingNumber: action === 'shipped' ? this.trackingNumber() : '',
-        sendMail: this.notifyCustomer(),
-      });
-      const parts = ['Gespeichert.'];
-      if (result.refunded) parts.push('Betrag über Stripe erstattet.');
-      if (result.mailed) parts.push('Mail an die Kundin oder den Kunden gesendet.');
-      this.notice.set(success(parts.join(' ')));
-      this.confirmCancel.set(false);
-      this.order.reload();
-    } catch (error) {
-      this.notice.set(failure(error, 'Die Bestellung konnte nicht aktualisiert werden.'));
-    } finally {
-      this.busy.set(false);
-    }
+    this.pendingAction.set(action);
+  }
+
+  protected completed(message: string): void {
+    this.pendingAction.set(null);
+    this.notice.set(success(message));
+    this.order.reload();
   }
 }
