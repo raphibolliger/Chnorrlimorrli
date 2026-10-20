@@ -19,7 +19,7 @@ import { ChfPipe } from '../core/chf.pipe';
 import { ShippingPricePipe } from '../core/shipping-price.pipe';
 import { AdminApi } from './admin-api';
 import { OrderActionDialog } from './order-action-dialog';
-import { fulfillmentChips, paymentChips } from './order-chips';
+import { fulfillmentChip, paymentChips } from './order-chips';
 import { Icon } from './ui/icon';
 import { ListSkeleton } from './ui/list-skeleton';
 import { Notice, NoticeBanner, success } from './ui/notice-banner';
@@ -74,7 +74,7 @@ export class AdminOrderDetail {
   protected readonly pendingAction = signal<OrderAction | null>(null);
   protected readonly paymentMethodLabel = paymentMethodLabel;
   protected readonly paymentChips = paymentChips;
-  protected readonly fulfillmentChips = fulfillmentChips;
+  protected readonly fulfillmentChip = fulfillmentChip;
 
   protected readonly actions = computed(() => {
     const order = this.order.value();

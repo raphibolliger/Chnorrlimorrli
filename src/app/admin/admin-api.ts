@@ -41,8 +41,8 @@ const orderViews: Record<
   OrderView,
   { payment?: PaymentStatus[]; fulfillment?: FulfillmentStatus[] }
 > = {
-  open: { payment: ['paid'], fulfillment: ['new', 'processing', 'ready_for_pickup', 'shipped'] },
-  done: { fulfillment: ['delivered', 'cancelled'] },
+  open: { payment: ['paid'], fulfillment: ['new', 'processing', 'ready_for_pickup'] },
+  done: { fulfillment: ['shipped', 'delivered', 'cancelled'] },
   all: { payment: ['paid', 'refunded'] },
   unpaid: { payment: ['pending', 'failed', 'expired'] },
 };

@@ -1,15 +1,24 @@
 import { orderProgress, statusHeadline } from './order-progress';
 
 describe('orderProgress', () => {
-  it('follows the postal flow', () => {
+  it('ends the postal flow with the shipment', () => {
     expect(
       orderProgress({ order_number: 1001, shipping_kind: 'postal', fulfillment_status: 'shipped' }),
     ).toEqual([
       { label: 'Bestellt', state: 'done' },
       { label: 'In Arbeit', state: 'done' },
       { label: 'Versandt', state: 'current' },
-      { label: 'Geliefert', state: 'upcoming' },
     ]);
+  });
+
+  it('shows earlier postal orders marked as delivered as complete', () => {
+    expect(
+      orderProgress({
+        order_number: 1001,
+        shipping_kind: 'postal',
+        fulfillment_status: 'delivered',
+      }).map((step) => step.state),
+    ).toEqual(['done', 'done', 'current']);
   });
 
   it('names pickup steps and marks skipped steps as done', () => {

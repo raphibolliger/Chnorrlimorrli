@@ -16,10 +16,9 @@ type OrderState = Pick<OrderSummary, 'order_number' | 'shipping_kind' | 'fulfill
 
 export function orderProgress(order: OrderState): ProgressStep[] {
   const steps: ('new' | FulfillmentAction)[] = ['new', ...fulfillmentFlow[order.shipping_kind]];
-  const current = Math.max(
-    steps.findIndex((step) => step === order.fulfillment_status),
-    0,
-  );
+  const reached = steps.findIndex((step) => step === order.fulfillment_status);
+  const current =
+    reached >= 0 ? reached : order.fulfillment_status === 'delivered' ? steps.length - 1 : 0;
   return steps.map((step, index) => ({
     label: step === 'new' ? 'Bestellt' : fulfillmentStepLabel(step, order.shipping_kind),
     state: index < current ? 'done' : index === current ? 'current' : 'upcoming',

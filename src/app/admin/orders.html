@@ -47,7 +47,7 @@
             <span class="flex shrink-0 gap-1">
               <app-status-chip [chip]="paymentChips[order.payment_status]" />
               @if (showFulfillment(order)) {
-                <app-status-chip [chip]="fulfillmentChips[order.fulfillment_status]" />
+                <app-status-chip [chip]="fulfillmentChip(order)" />
               }
             </span>
           </div>
@@ -107,7 +107,7 @@
                 <span class="flex gap-1">
                   <app-status-chip [chip]="paymentChips[order.payment_status]" />
                   @if (showFulfillment(order)) {
-                    <app-status-chip [chip]="fulfillmentChips[order.fulfillment_status]" />
+                    <app-status-chip [chip]="fulfillmentChip(order)" />
                   }
                 </span>
               </td>
