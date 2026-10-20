@@ -115,14 +115,48 @@
       De Chnorrlimorrli und sini Erschaffer händ vil positive Support vo de Mensche us de Region
       becho. Mir bedankid öis vo ganzem Herze bi allne, wo i irgend enere Form mitghulfe händ.
     </p>
-    <a href="images/ueber-uns/merci-1600.webp" target="_blank" rel="noopener" class="mt-8 block">
-      <app-site-image
-        name="ueber-uns/merci"
-        alt="Dankesseite aus dem Buch mit allen Unterstützerinnen und Unterstützern"
-        sizes="(min-width: 1152px) 1120px, 100vw"
-        imageClass="h-auto w-full rounded-2xl shadow-md ring-1 ring-ink/5"
-      />
-      <span class="mt-2 block text-sm text-ink/60">Zum Vergrössern anklicken</span>
-    </a>
+
+    <div class="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+      <article class="self-start rounded-3xl bg-mais-50 p-6 sm:p-8">
+        <h3 class="text-xl font-semibold text-navy">
+          Der Verein Chnorrlimorrli sagt Danke für die finanzielle Unterstützung
+        </h3>
+        <ul class="mt-4 grid gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-1">
+          @for (supporter of financialSupporters; track supporter) {
+            <li>{{ supporter }}</li>
+          }
+        </ul>
+      </article>
+
+      <article class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5 sm:p-8">
+        <h3 class="text-xl font-semibold text-navy">
+          Autor Stefan Sprenger, Karikaturistin Esther «Etschgi» Sorg und der Verein Chnorrlimorrli
+          sagen Danke
+        </h3>
+        <p class="mt-4 font-semibold">Für jede Einzelni, wo s Buech kauft und gläse het</p>
+        <dl class="mt-4 space-y-3">
+          @for (help of thanksForHelp; track help.for) {
+            <div>
+              <dt class="font-semibold">{{ help.for }}</dt>
+              <dd class="text-ink/80">{{ help.names }}</dd>
+            </div>
+          }
+        </dl>
+        <p class="mt-6 font-semibold">
+          Für die wertvolle Inputs, de riesigi Support und s Mitschaffe be ganz vil verschiedene
+          Sache
+        </p>
+        <ul class="mt-3 gap-x-8 text-ink/80 sm:columns-2">
+          @for (supporter of supporters; track supporter) {
+            <li class="mb-2 break-inside-avoid">{{ supporter }}</li>
+          }
+        </ul>
+        <div class="mt-6 space-y-2 border-t border-ink/10 pt-5 font-medium text-navy">
+          @for (line of closingThanks; track line) {
+            <p>{{ line }}</p>
+          }
+        </div>
+      </article>
+    </div>
   </div>
 </section>

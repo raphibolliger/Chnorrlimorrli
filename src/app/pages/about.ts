@@ -3,6 +3,7 @@ import { PageIntro } from '../components/page-intro';
 import { SiteImage } from '../components/site-image';
 import { contactEmail } from '../content/navigation';
 import { texts } from '../content/texts';
+import { closingThanks, financialSupporters, supporters, thanksForHelp } from '../content/thanks';
 
 @Component({
   selector: 'app-about',
@@ -13,6 +14,10 @@ import { texts } from '../content/texts';
 export class About {
   protected readonly texts = texts;
   protected readonly contactEmail = contactEmail;
+  protected readonly financialSupporters = financialSupporters;
+  protected readonly thanksForHelp = thanksForHelp;
+  protected readonly supporters = supporters;
+  protected readonly closingThanks = closingThanks;
   protected readonly creators = [
     {
       title: 'Der Autor',
