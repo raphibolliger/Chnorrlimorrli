@@ -31,7 +31,6 @@ export const siteImages: Record<string, SiteImage> = {
   'ueber-uns/making-of': { width: 500, height: 621, widths: [500] },
   'ueber-uns/brazzo': { width: 1200, height: 1600, widths: [480, 960, 1200] },
   'ueber-uns/madame-miau': { width: 1600, height: 1200, widths: [480, 960, 1600] },
-  'ueber-uns/merci': { width: 1600, height: 1088, widths: [480, 960, 1600, 1600] },
   'erleben/baenkli-villmergen': { width: 1000, height: 750, widths: [480, 1000] },
   'erleben/baenkli-muri': { width: 1000, height: 753, widths: [480, 1000] },
   'erleben/brot': { width: 750, height: 1000, widths: [480, 750] },
