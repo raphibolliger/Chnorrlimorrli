@@ -1,11 +1,13 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { AdminClient, adminClient, stripeClient } from '../_shared/clients.ts';
 import { corsHeaders, json } from '../_shared/cors.ts';
-import { CustomerMailKind, sendCustomerMail } from '../_shared/order-mails.ts';
+import { sendCustomerMail } from '../_shared/order-mails.ts';
 import {
   FulfillmentAction,
+  fulfillmentMailKinds,
   OrderUpdateRequest,
   OrderUpdateResult,
+  sendsCustomerMail,
   TableRow,
 } from '../_shared/orders.ts';
 
@@ -14,15 +16,8 @@ type OrderState = Pick<
   'id' | 'payment_status' | 'paid_at' | 'stripe_payment_intent_id' | 'stripe_checkout_session_id'
 >;
 
-const fulfillmentMails: Record<FulfillmentAction, CustomerMailKind | null> = {
-  processing: null,
-  ready_for_pickup: 'ready_for_pickup',
-  shipped: 'shipped',
-  delivered: 'delivered',
-};
-
 function isFulfillmentAction(action: unknown): action is FulfillmentAction {
-  return typeof action === 'string' && action in fulfillmentMails;
+  return typeof action === 'string' && action in fulfillmentMailKinds;
 }
 
 async function isAdmin(request: Request): Promise<boolean> {
@@ -63,8 +58,10 @@ async function cancel(
   }
   const refunded = refundableIntent !== null;
   await supabase.rpc('cancel_order', { p_order_id: order.id, p_refunded: refunded }).throwOnError();
-  const wasPaid = order.paid_at !== null;
-  const mailed = notify && wasPaid && (await sendCustomerMail(supabase, order.id, 'cancelled'));
+  const mailed =
+    notify &&
+    sendsCustomerMail('cancel', order) &&
+    (await sendCustomerMail(supabase, order.id, 'cancelled'));
   return { refunded, mailed };
 }
 
@@ -82,7 +79,7 @@ async function fulfil(
       p_tracking_number: trackingNumber,
     })
     .throwOnError();
-  const mail = fulfillmentMails[action];
+  const mail = fulfillmentMailKinds[action];
   const mailed = notify && mail !== null && (await sendCustomerMail(supabase, order.id, mail));
   return { refunded: false, mailed };
 }

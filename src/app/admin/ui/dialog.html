@@ -1,0 +1,58 @@
+<dialog
+  #dialog
+  class="admin-ui m-auto flex-col overflow-hidden bg-white p-0 font-sans text-gray-900 shadow-xl backdrop:bg-gray-900/40 open:flex max-md:h-dvh max-md:max-h-none max-md:w-screen max-md:max-w-none max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)] md:max-h-[calc(100dvh-4rem)] md:w-[calc(100vw-4rem)] md:max-w-xl md:rounded-2xl"
+  [attr.aria-labelledby]="titleId"
+  (cancel)="escape($event)"
+  (close)="closedByBrowser()"
+  (pointerdown)="pressed($event)"
+  (click)="clicked($event)"
+>
+  <header class="flex shrink-0 items-start gap-3 border-b border-gray-200 px-4 py-3 md:px-5">
+    <div class="min-w-0 flex-1 py-1">
+      <h2 [id]="titleId" class="text-lg font-semibold">{{ title() }}</h2>
+      @if (subtitle(); as text) {
+        <p class="text-sm text-gray-500">{{ text }}</p>
+      }
+    </div>
+    <button
+      type="button"
+      (click)="requestClose()"
+      [disabled]="busy()"
+      class="-mr-2 inline-flex size-10 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-40"
+      aria-label="Schliessen"
+    >
+      <app-icon name="close" />
+    </button>
+  </header>
+
+  <div class="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-5">
+    <ng-content />
+  </div>
+
+  <footer class="shrink-0 border-t border-gray-200 bg-gray-50 px-4 py-3 md:px-5">
+    @if (confirmingDiscard()) {
+      <div class="flex flex-wrap items-center justify-end gap-2" role="alert">
+        <p class="mr-auto text-sm font-medium text-gray-800">
+          Ungespeicherte Änderungen verwerfen?
+        </p>
+        <button type="button" (click)="confirmingDiscard.set(false)" class="admin-button-secondary">
+          Weiter bearbeiten
+        </button>
+        <button type="button" (click)="dismissed.emit()" class="admin-button-danger">
+          Verwerfen
+        </button>
+      </div>
+    }
+    <div class="flex flex-wrap justify-end gap-2" [class.hidden]="confirmingDiscard()">
+      <button
+        type="button"
+        (click)="requestClose()"
+        [disabled]="busy()"
+        class="admin-button-secondary"
+      >
+        Abbrechen
+      </button>
+      <ng-content select="[dialogActions]" />
+    </div>
+  </footer>
+</dialog>

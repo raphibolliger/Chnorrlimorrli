@@ -1,6 +1,9 @@
 <app-admin-page-header title="Versand" subtitle="Änderungen gelten sofort an der Kasse" />
 
 <div class="grid gap-4 p-4 md:p-0">
+  @if (notice(); as notice) {
+    <app-notice-banner [notice]="notice" />
+  }
   @if (methods.isLoading() && !methods.hasValue()) {
     <app-list-skeleton [rows]="3" />
   } @else if (methods.error()) {
@@ -9,7 +12,67 @@
     </p>
   } @else {
     @for (method of methods.value(); track method.id) {
-      <app-shipping-method-form [method]="method" (saved)="methods.reload()" />
+      <app-section-card
+        [title]="method.name"
+        [icon]="kinds[method.kind].icon"
+        [subtitle]="kinds[method.kind].label"
+      >
+        <button sectionActions type="button" (click)="edit(method)" class="admin-button-secondary">
+          <app-icon name="edit" [size]="18" />
+          Bearbeiten
+        </button>
+        <dl class="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+          <div>
+            <dt class="text-gray-500">Kasse</dt>
+            <dd class="mt-0.5"><app-status-chip [chip]="availabilityChip(method)" /></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Reihenfolge</dt>
+            <dd>{{ method.sort_order }}</dd>
+          </div>
+          <div class="sm:col-span-2">
+            <dt class="text-gray-500">Beschreibung</dt>
+            <dd>{{ method.description ?? '–' }}</dd>
+          </div>
+          <div class="sm:col-span-2">
+            <dt class="text-gray-500">Preisstufen nach Warenwert</dt>
+            <dd>
+              <ul>
+                @for (rate of method.shipping_rates; track rate.id) {
+                  <li class="tabular-nums">
+                    ab {{ rate.from_subtotal_rappen | chf }}:
+                    <span class="font-medium">{{ rate.price_rappen | shippingPrice }}</span>
+                  </li>
+                }
+              </ul>
+            </dd>
+          </div>
+          @if (method.kind === 'local_delivery') {
+            <div class="sm:col-span-2">
+              <dt class="text-gray-500">
+                Liefergebiet ({{ method.postal_codes.length }} Postleitzahlen)
+              </dt>
+              <dd class="font-mono text-xs leading-relaxed text-gray-700">
+                {{ method.postal_codes.join(', ') || '–' }}
+              </dd>
+            </div>
+          }
+          @if (method.kind === 'pickup') {
+            <div>
+              <dt class="text-gray-500">Abholort</dt>
+              <dd>{{ method.pickup_location ?? '–' }}</dd>
+            </div>
+            <div>
+              <dt class="text-gray-500">Öffnungszeiten</dt>
+              <dd>{{ method.pickup_hours ?? '–' }}</dd>
+            </div>
+          }
+        </dl>
+      </app-section-card>
     }
   }
 </div>
+
+@if (editing(); as method) {
+  <app-shipping-method-dialog [method]="method" (saved)="saved()" (dismissed)="editing.set(null)" />
+}

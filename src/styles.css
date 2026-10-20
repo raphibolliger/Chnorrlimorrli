@@ -73,17 +73,21 @@
     cursor: not-allowed;
   }
 
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
   .admin-ui :is(h1, h2, h3, h4) {
     font-family: var(--font-sans);
   }
 }
 
 @utility admin-field {
-  @apply min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-info focus:ring-2 focus:ring-info-muted disabled:bg-gray-50 md:min-h-9;
+  @apply min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-base text-gray-900 outline-none placeholder:text-gray-400 focus:border-info focus:ring-2 focus:ring-info-muted disabled:bg-gray-50 md:min-h-9 md:text-sm;
 }
 
 @utility admin-textarea {
-  @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-info focus:ring-2 focus:ring-info-muted;
+  @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 outline-none placeholder:text-gray-400 focus:border-info focus:ring-2 focus:ring-info-muted md:text-sm;
 }
 
 @utility admin-label {

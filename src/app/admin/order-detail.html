@@ -19,83 +19,28 @@
     }
 
     @if (actions().length > 0 || canCancel()) {
-      <app-section-card title="Status ändern" icon="edit" class="md:col-span-2">
-        @if (awaitsShipping()) {
-          <label class="mb-3 block max-w-sm">
-            <span class="admin-label"
-              >Sendungsnummer
-              <span class="font-normal text-gray-500">(für «Versandt», freiwillig)</span></span
-            >
-            <input
-              class="admin-field"
-              [ngModel]="trackingNumber()"
-              (ngModelChange)="trackingNumber.set($event)"
-            />
-          </label>
-        }
-        <label class="mb-4 flex items-center gap-2 text-sm text-gray-700">
-          <input
-            type="checkbox"
-            class="admin-checkbox"
-            [ngModel]="notifyCustomer()"
-            (ngModelChange)="notifyCustomer.set($event)"
-          />
-          Kundin oder Kunde per Mail informieren
-        </label>
+      <app-section-card
+        title="Status ändern"
+        icon="edit"
+        subtitle="Jede Änderung öffnet einen Dialog, in dem du die Mail an die Kundin oder den Kunden steuerst."
+        class="md:col-span-2"
+      >
         <div class="flex flex-wrap gap-2">
           @for (step of actions(); track step.action) {
-            <button
-              type="button"
-              (click)="run(step.action)"
-              [disabled]="busy()"
-              class="admin-button-primary"
-            >
+            <button type="button" (click)="startAction(step.action)" class="admin-button-primary">
               {{ step.label }}
             </button>
           }
-          @if (canCancel() && !confirmCancel()) {
+          @if (canCancel()) {
             <button
               type="button"
-              (click)="confirmCancel.set(true)"
-              [disabled]="busy()"
-              class="admin-button-secondary"
+              (click)="startAction('cancel')"
+              class="admin-button-secondary text-danger"
             >
-              Stornieren
+              Stornieren …
             </button>
           }
         </div>
-        @if (confirmCancel()) {
-          <div class="mt-4 rounded-xl bg-danger-soft p-4 text-sm text-danger-strong">
-            <p>
-              @if (order.payment_status === 'paid') {
-                Die Bestellung wird storniert und {{ order.total_rappen | chf }} werden über Stripe
-                zurückerstattet. Der Lagerbestand wird wieder erhöht.
-              } @else if (order.payment_status === 'refunded') {
-                Die Bestellung wird storniert. Der Betrag wurde bereits über Stripe erstattet. Der
-                Lagerbestand wird wieder erhöht.
-              } @else {
-                Die Bestellung wird storniert. Es wurde nichts bezahlt.
-              }
-            </p>
-            <div class="mt-3 flex flex-wrap gap-2">
-              <button
-                type="button"
-                (click)="run('cancel')"
-                [disabled]="busy()"
-                class="admin-button-danger"
-              >
-                Ja, stornieren
-              </button>
-              <button
-                type="button"
-                (click)="confirmCancel.set(false)"
-                class="admin-button-secondary"
-              >
-                Abbrechen
-              </button>
-            </div>
-          </div>
-        }
       </app-section-card>
     }
 
@@ -198,6 +143,15 @@
       </ul>
     </app-section-card>
   </div>
+
+  @if (pendingAction(); as action) {
+    <app-order-action-dialog
+      [order]="order"
+      [action]="action"
+      (done)="completed($event)"
+      (dismissed)="pendingAction.set(null)"
+    />
+  }
 } @else {
   <app-admin-page-header title="Bestellung" backLink="/admin/bestellungen" />
   <p class="m-4 rounded-xl bg-white p-6 text-sm shadow-sm ring-1 ring-gray-200 md:m-0">

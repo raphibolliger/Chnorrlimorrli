@@ -1,0 +1,295 @@
+@if (product.isLoading() && !product.hasValue()) {
+  <app-admin-page-header title="Produkt" backLink="/admin/produkte" />
+  <div class="p-4 md:p-0"><app-list-skeleton [rows]="3" /></div>
+} @else if (product.value(); as current) {
+  <app-admin-page-header
+    [title]="current.name"
+    [subtitle]="'/shop/' + current.slug"
+    backLink="/admin/produkte"
+  >
+    <button pageActions type="button" (click)="editing.set(true)" class="admin-button-primary">
+      <app-icon name="edit" [size]="18" />
+      Bearbeiten
+    </button>
+  </app-admin-page-header>
+
+  <div class="grid gap-4 p-4 md:grid-cols-2 md:p-0">
+    @if (notice(); as notice) {
+      <app-notice-banner [notice]="notice" class="md:col-span-2" />
+    }
+
+    <app-section-card title="Allgemein" icon="tag" class="md:col-span-2">
+      <dl class="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <dt class="text-gray-500">Preis</dt>
+          <dd class="font-medium tabular-nums">{{ current.price_rappen | chf }}</dd>
+        </div>
+        <div>
+          <dt class="text-gray-500">Art.-Nr.</dt>
+          <dd class="font-mono">{{ current.sku ?? '–' }}</dd>
+        </div>
+        <div>
+          <dt class="text-gray-500">Reihenfolge</dt>
+          <dd>{{ current.sort_order }}</dd>
+        </div>
+        <div>
+          <dt class="text-gray-500">Im Shop</dt>
+          <dd class="mt-0.5"><app-status-chip [chip]="visibilityChip(current)" /></dd>
+        </div>
+        <div class="sm:col-span-2 lg:col-span-4">
+          <dt class="text-gray-500">Kurzbeschreibung</dt>
+          <dd>{{ current.short_description ?? '–' }}</dd>
+        </div>
+        <div class="sm:col-span-2 lg:col-span-4">
+          <dt class="text-gray-500">Beschreibung</dt>
+          <dd class="space-y-2 leading-relaxed">
+            @for (paragraph of paragraphs(); track $index) {
+              <p>{{ paragraph }}</p>
+            } @empty {
+              –
+            }
+          </dd>
+        </div>
+      </dl>
+    </app-section-card>
+
+    <app-section-card title="Lager" icon="box">
+      <p class="text-sm">
+        @if (current.track_stock) {
+          <span class="font-medium tabular-nums">{{ stockLabel(current) }}</span> an Lager
+        } @else {
+          Unbegrenzt bestellbar
+        }
+      </p>
+    </app-section-card>
+
+    <app-section-card title="Optionen" icon="edit">
+      @for (option of current.product_options; track option.id) {
+        <p class="text-sm">
+          <span class="font-medium">{{ option.name }}:</span> {{ option.choices.join(', ') }}
+        </p>
+      } @empty {
+        <p class="text-sm text-gray-500">Keine Optionen</p>
+      }
+    </app-section-card>
+
+    <app-section-card
+      title="Bilder"
+      icon="image"
+      subtitle="Das erste Bild erscheint in der Produktliste. Bilder werden beim Hochladen verkleinert."
+      class="md:col-span-2"
+    >
+      <ul class="grid gap-2">
+        @for (
+          image of current.product_images;
+          track image.id;
+          let index = $index;
+          let first = $first;
+          let last = $last
+        ) {
+          <li class="flex items-center gap-3 rounded-xl bg-gray-50 p-2">
+            <span
+              class="relative size-16 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-gray-200"
+            >
+              <app-product-image
+                [path]="image.storage_path"
+                [alt]="image.alt ?? ''"
+                imageClass="object-contain p-1"
+              />
+            </span>
+            <p class="min-w-0 flex-1 text-sm" [class.text-gray-400]="!image.alt">
+              {{ image.alt || 'Ohne Bildbeschreibung' }}
+            </p>
+            <button
+              type="button"
+              (click)="describeImage(image)"
+              class="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-900"
+              aria-label="Bildbeschreibung bearbeiten"
+            >
+              <app-icon name="edit" [size]="18" />
+            </button>
+            <span class="flex shrink-0 flex-col">
+              <button
+                type="button"
+                (click)="moveImage(index, -1)"
+                [disabled]="first"
+                class="inline-flex size-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 disabled:opacity-30"
+                aria-label="Nach oben"
+              >
+                <app-icon name="up" [size]="16" />
+              </button>
+              <button
+                type="button"
+                (click)="moveImage(index, 1)"
+                [disabled]="last"
+                class="inline-flex size-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 disabled:opacity-30"
+                aria-label="Nach unten"
+              >
+                <app-icon name="down" [size]="16" />
+              </button>
+            </span>
+            <button
+              type="button"
+              (click)="removeImage(image)"
+              class="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-danger"
+              aria-label="Bild löschen"
+            >
+              <app-icon name="trash" [size]="18" />
+            </button>
+          </li>
+        } @empty {
+          <li class="rounded-xl bg-gray-50 p-4 text-sm text-gray-500">Noch keine Bilder.</li>
+        }
+      </ul>
+      <label class="admin-button-secondary mt-3">
+        <app-icon name="plus" [size]="18" />
+        {{ uploading() ? 'Hochladen …' : 'Bilder hochladen' }}
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          class="sr-only"
+          (change)="upload($event)"
+          [disabled]="uploading()"
+        />
+      </label>
+    </app-section-card>
+
+    <app-section-card
+      title="Produkt löschen"
+      icon="trash"
+      subtitle="Bestehende Bestellungen bleiben erhalten. Meist genügt es, das Produkt auszublenden."
+      class="md:col-span-2"
+    >
+      <button
+        type="button"
+        (click)="confirmingDelete.set(true)"
+        class="admin-button-secondary text-danger"
+      >
+        Produkt löschen …
+      </button>
+    </app-section-card>
+  </div>
+
+  @if (editing()) {
+    <app-product-form-dialog
+      [product]="current"
+      (saved)="saved()"
+      (dismissed)="editing.set(false)"
+    />
+  }
+
+  @if (describedImage(); as image) {
+    <app-admin-dialog
+      title="Bildbeschreibung"
+      subtitle="Wird von Screenreadern vorgelesen und erscheint, wenn das Bild nicht lädt."
+      [dirty]="descriptionChanged()"
+      [busy]="imageBusy()"
+      (dismissed)="describedImage.set(null)"
+    >
+      <form
+        id="image-form"
+        class="grid gap-4"
+        (submit)="$event.preventDefault(); saveDescription()"
+      >
+        @if (imageNotice(); as notice) {
+          <app-notice-banner [notice]="notice" />
+        }
+        <span
+          class="relative mx-auto block size-40 overflow-hidden rounded-xl bg-gray-50 ring-1 ring-gray-200"
+        >
+          <app-product-image
+            [path]="image.storage_path"
+            [alt]="image.alt ?? ''"
+            imageClass="object-contain p-2"
+          />
+        </span>
+        <label class="block">
+          <span class="admin-label">Beschreibung</span>
+          <input
+            autofocus
+            name="description"
+            class="admin-field"
+            [ngModel]="imageDescription()"
+            (ngModelChange)="imageDescription.set($event)"
+            placeholder="z. B. Buchcover Chnorrlimorrli 2"
+          />
+        </label>
+      </form>
+      <button
+        dialogActions
+        type="submit"
+        form="image-form"
+        [disabled]="imageBusy()"
+        class="admin-button-primary"
+      >
+        <app-icon name="check" [size]="18" />
+        Speichern
+      </button>
+    </app-admin-dialog>
+  }
+
+  @if (removedImage(); as image) {
+    <app-admin-dialog
+      title="Bild löschen?"
+      [busy]="imageBusy()"
+      (dismissed)="removedImage.set(null)"
+    >
+      <div class="grid gap-4">
+        @if (imageNotice(); as notice) {
+          <app-notice-banner [notice]="notice" />
+        }
+        <span
+          class="relative mx-auto block size-40 overflow-hidden rounded-xl bg-gray-50 ring-1 ring-gray-200"
+        >
+          <app-product-image
+            [path]="image.storage_path"
+            [alt]="image.alt ?? ''"
+            imageClass="object-contain p-2"
+          />
+        </span>
+        <p class="text-sm text-gray-700">Das Bild wird aus dem Shop entfernt.</p>
+      </div>
+      <button
+        dialogActions
+        type="button"
+        (click)="confirmRemoveImage()"
+        [disabled]="imageBusy()"
+        class="admin-button-danger"
+      >
+        <app-icon name="trash" [size]="18" />
+        Bild löschen
+      </button>
+    </app-admin-dialog>
+  }
+
+  @if (confirmingDelete()) {
+    <app-admin-dialog
+      title="Produkt löschen?"
+      [subtitle]="current.name"
+      [busy]="deleting()"
+      (dismissed)="confirmingDelete.set(false)"
+    >
+      <p class="text-sm text-gray-700">
+        Das Produkt und seine Bilder werden endgültig gelöscht. Bestehende Bestellungen bleiben
+        erhalten. Wenn das Produkt nur vorübergehend nicht verkauft wird, genügt es, es
+        auszublenden.
+      </p>
+      <button
+        dialogActions
+        type="button"
+        (click)="remove()"
+        [disabled]="deleting()"
+        class="admin-button-danger"
+      >
+        <app-icon name="trash" [size]="18" />
+        Endgültig löschen
+      </button>
+    </app-admin-dialog>
+  }
+} @else {
+  <app-admin-page-header title="Produkt" backLink="/admin/produkte" />
+  <p class="m-4 rounded-xl bg-white p-6 text-sm shadow-sm ring-1 ring-gray-200 md:m-0">
+    Produkt nicht gefunden.
+  </p>
+}

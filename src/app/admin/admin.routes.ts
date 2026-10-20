@@ -30,7 +30,7 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'produkte/:id',
-        loadComponent: () => import('./product-edit').then((m) => m.AdminProductEdit),
+        loadComponent: () => import('./product-detail').then((m) => m.AdminProductDetail),
         title: 'Produkt – Chnorrlimorrli Verwaltung',
       },
       {

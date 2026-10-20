@@ -1,0 +1,57 @@
+<app-admin-dialog
+  [title]="title()"
+  [subtitle]="'Bestellung #' + order().order_number"
+  [dirty]="dirty()"
+  [busy]="busy()"
+  (dismissed)="dismissed.emit()"
+>
+  <form id="order-action-form" class="grid gap-4" (submit)="$event.preventDefault(); confirm()">
+    @if (notice(); as notice) {
+      <app-notice-banner [notice]="notice" />
+    }
+    <p class="text-sm text-gray-700">{{ description() }}</p>
+    @if (action() === 'shipped') {
+      <label class="block">
+        <span class="admin-label"
+          >Sendungsnummer <span class="font-normal text-gray-500">(freiwillig)</span></span
+        >
+        <input
+          autofocus
+          name="trackingNumber"
+          class="admin-field font-mono"
+          placeholder="99.00.123456.12345678"
+          [ngModel]="trackingNumber()"
+          (ngModelChange)="trackingNumber.set($event)"
+        />
+        <span class="admin-hint"
+          >Erscheint im Mail mit einem Link zur Sendungsverfolgung der Post.</span
+        >
+      </label>
+    }
+    @if (mailsCustomer()) {
+      <label class="flex items-center gap-2 text-sm text-gray-800">
+        <input
+          type="checkbox"
+          name="notifyCustomer"
+          class="admin-checkbox"
+          [ngModel]="notifyCustomer()"
+          (ngModelChange)="notifyCustomer.set($event)"
+        />
+        Kundin oder Kunde per Mail informieren
+      </label>
+    } @else {
+      <p class="text-sm text-gray-500">Es wird keine Mail verschickt.</p>
+    }
+  </form>
+
+  <button
+    dialogActions
+    type="submit"
+    form="order-action-form"
+    [disabled]="busy()"
+    [class]="cancelling() ? 'admin-button-danger' : 'admin-button-primary'"
+  >
+    <app-icon [name]="cancelling() ? 'close' : 'check'" [size]="18" />
+    {{ busy() ? 'Einen Moment …' : cancelling() ? 'Stornieren' : 'Status setzen' }}
+  </button>
+</app-admin-dialog>

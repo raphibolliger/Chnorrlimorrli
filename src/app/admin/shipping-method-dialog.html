@@ -1,9 +1,20 @@
-<app-section-card [title]="method().name" [icon]="kind().icon" [subtitle]="kind().label">
-  <form class="grid gap-4" (submit)="$event.preventDefault(); save()">
+<app-admin-dialog
+  title="Versandmethode bearbeiten"
+  [subtitle]="kind().label"
+  [dirty]="dirty()"
+  [busy]="saving()"
+  (dismissed)="dismissed.emit()"
+>
+  <form id="shipping-form" class="grid gap-4" (submit)="$event.preventDefault(); save()">
+    @if (notice(); as notice) {
+      <app-notice-banner [notice]="notice" />
+    }
+
     <div class="grid gap-4 md:grid-cols-[1fr_minmax(0,140px)]">
       <label class="block">
         <span class="admin-label">Name an der Kasse</span>
         <input
+          autofocus
           name="name"
           class="admin-field"
           [ngModel]="form().name"
@@ -127,16 +138,16 @@
         </label>
       </div>
     }
-
-    @if (notice(); as notice) {
-      <app-notice-banner [notice]="notice" />
-    }
-
-    <div class="flex justify-end">
-      <button type="submit" [disabled]="saving()" class="admin-button-primary">
-        <app-icon name="check" [size]="18" />
-        {{ saving() ? 'Speichern …' : 'Speichern' }}
-      </button>
-    </div>
   </form>
-</app-section-card>
+
+  <button
+    dialogActions
+    type="submit"
+    form="shipping-form"
+    [disabled]="saving()"
+    class="admin-button-primary"
+  >
+    <app-icon name="check" [size]="18" />
+    {{ saving() ? 'Speichern …' : 'Speichern' }}
+  </button>
+</app-admin-dialog>
