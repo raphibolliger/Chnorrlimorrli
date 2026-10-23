@@ -12,6 +12,7 @@ export const paymentChips: Record<PaymentStatus, Chip> = {
   failed: { label: 'Zahlung fehlgeschlagen', icon: 'close', tone: 'danger' },
   expired: { label: 'Abgebrochen', icon: 'close', tone: 'neutral' },
   refunded: { label: 'Erstattet', icon: 'undo', tone: 'info' },
+  due: { label: 'Bezahlung bei Abholung', icon: 'store', tone: 'warning' },
 };
 
 const fulfillmentChips: Record<FulfillmentStatus, Chip> = {

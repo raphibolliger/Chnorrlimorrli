@@ -26,6 +26,8 @@ function cancellationText(order: OrderDetail): string {
       return `Die Bestellung wird storniert und ${formatChf(order.total_rappen)} werden über Stripe zurückerstattet. Der Lagerbestand wird wieder erhöht.`;
     case 'refunded':
       return 'Die Bestellung wird storniert. Der Betrag wurde bereits über Stripe erstattet. Der Lagerbestand wird wieder erhöht.';
+    case 'due':
+      return 'Die Bestellung wird storniert. Es wurde nichts bezahlt (Barzahlung bei Abholung). Der Lagerbestand wird wieder erhöht.';
     default:
       return 'Die Bestellung wird storniert. Es wurde nichts bezahlt.';
   }
@@ -59,9 +61,14 @@ export class OrderActionDialog {
   });
   protected readonly description = computed(() => {
     const action = this.action();
-    return action === 'cancel'
-      ? cancellationText(this.order())
-      : `Die Bestellung wird als «${fulfillmentStepLabel(action, this.order().shipping_kind)}» markiert.`;
+    const order = this.order();
+    if (action === 'cancel') {
+      return cancellationText(order);
+    }
+    const marked = `Die Bestellung wird als «${fulfillmentStepLabel(action, order.shipping_kind)}» markiert`;
+    return action === 'delivered' && order.payment_status === 'due'
+      ? `${marked} und ${formatChf(order.total_rappen)} werden als bar bezahlt verbucht.`
+      : `${marked}.`;
   });
   protected readonly mailsCustomer = computed(() => sendsCustomerMail(this.action(), this.order()));
   protected readonly dirty = computed(

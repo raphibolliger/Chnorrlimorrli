@@ -8,6 +8,7 @@ import {
 } from '../_shared/checkout.ts';
 import { adminClient, stripeClient } from '../_shared/clients.ts';
 import { corsHeaders, isAllowedOrigin, json, returnBaseUrl } from '../_shared/cors.ts';
+import { sendAdminNotification, sendCustomerMail } from '../_shared/order-mails.ts';
 import { optionsText, orderPagePath } from '../_shared/orders.ts';
 
 const unavailable = 'Der Shop ist gerade nicht erreichbar. Bitte versuche es später noch einmal.';
@@ -82,7 +83,7 @@ Deno.serve(async (request) => {
     return json(request, { errors: validation.errors }, 422);
   }
 
-  const { data: order, error: orderError } = await supabase.rpc('create_pending_order', {
+  const { data: order, error: orderError } = await supabase.rpc('create_order', {
     p_order: validation.order,
     p_items: validation.items,
   });
@@ -92,6 +93,15 @@ Deno.serve(async (request) => {
   }
 
   const baseUrl = returnBaseUrl(body.returnBaseUrl);
+  const orderPageUrl = `${baseUrl}/${orderPagePath(order.access_token)}&neu=1`;
+  if (validation.order.payment_method === 'cash') {
+    await Promise.all([
+      sendCustomerMail(supabase, order.id, 'confirmation'),
+      sendAdminNotification(supabase, order.id),
+    ]);
+    return json(request, { url: orderPageUrl });
+  }
+
   const metadata = { order_id: order.id, order_number: String(order.order_number) };
   try {
     const session = await stripeClient().checkout.sessions.create({
@@ -106,7 +116,7 @@ Deno.serve(async (request) => {
         metadata,
       },
       line_items: lineItems(validation.order, validation.items),
-      success_url: `${baseUrl}/${orderPagePath(order.access_token)}&neu=1`,
+      success_url: orderPageUrl,
       cancel_url: `${baseUrl}/kasse?abgebrochen=1`,
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     });

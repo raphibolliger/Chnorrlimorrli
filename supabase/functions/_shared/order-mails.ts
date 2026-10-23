@@ -51,6 +51,7 @@ export async function loadOrderMail(supabase: AdminClient, orderId: string): Pro
     customerNote: order.customer_note,
     paymentMethod: order.payment_method,
     refunded: order.payment_status === 'refunded',
+    paymentDue: order.payment_status === 'due',
     trackingNumber: order.tracking_number,
     orderUrl: `${siteUrl()}/${orderPagePath(order.access_token)}`,
     pickupLocation: order.shipping_methods?.pickup_location ?? null,

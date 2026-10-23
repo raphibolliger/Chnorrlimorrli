@@ -28,6 +28,7 @@ const order: OrderMail = {
   customerNote: 'Bitte <b>schnell</b>',
   paymentMethod: 'twint',
   refunded: false,
+  paymentDue: false,
   items: [
     { name: 'Chnorrlimorrli 2', options: {}, quantity: 1, lineTotalRappen: 4000 },
     {
@@ -156,4 +157,29 @@ Deno.test('the closing mail says abgeholt for pickups and geliefert otherwise', 
   const pickup = orderDelivered({ ...order, shippingKind: 'pickup' }, 'x');
   assertStringIncludes(pickup.subject, 'wurde abgeholt');
   assertStringIncludes(pickup.text, 'Deine Bestellung 1001 wurde abgeholt.');
+});
+
+Deno.test('cash orders ask for payment at pickup instead of confirming a payment', () => {
+  const cashOrder: OrderMail = {
+    ...order,
+    shippingKind: 'pickup',
+    shippingName: 'Selbstabholung',
+    shippingRappen: 0,
+    totalRappen: 5000,
+    paymentMethod: 'cash',
+    paymentDue: true,
+  };
+  const confirmation = orderConfirmation(cashOrder, 'x');
+  assertStringIncludes(confirmation.text, 'wir haben deine Bestellung 1001 erhalten.');
+  assertStringIncludes(
+    confirmation.text,
+    'Bezahlung: bei der Abholung, CHF 50.00, zum Beispiel bar.',
+  );
+  assert(!confirmation.text.includes('Stripe'));
+  assertStringIncludes(
+    adminNewOrder(cashOrder, 'x').text,
+    'Bezahlung bei der Abholung: CHF 50.00, noch offen.',
+  );
+  assertStringIncludes(orderReadyForPickup(cashOrder, 'x').text, 'CHF 50.00, zum Beispiel bar');
+  assert(!orderReadyForPickup(order, 'x').text.includes('Bezahlung:'));
 });

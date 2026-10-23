@@ -16,6 +16,7 @@ import {
   isSwissPostalCode,
   shippingPriceRappen,
 } from '../../../supabase/functions/_shared/pricing';
+import type { CheckoutPayment } from '../../../supabase/functions/_shared/orders';
 import { Cart } from '../core/cart';
 import { CheckoutApi, CheckoutError, checkoutFailed } from '../core/checkout-api';
 import { ChfPipe } from '../core/chf.pipe';
@@ -23,6 +24,12 @@ import { ShippingPricePipe } from '../core/shipping-price.pipe';
 import { ShippingMethod, ShopApi } from '../core/shop-api';
 
 type AddressField = 'street' | 'postalCode' | 'city';
+
+interface PaymentOption {
+  value: CheckoutPayment;
+  label: string;
+  description: string;
+}
 
 @Component({
   selector: 'app-checkout',
@@ -48,6 +55,7 @@ export class Checkout {
     postalCode: [''],
     city: [''],
     note: [''],
+    payment: ['online' as CheckoutPayment],
     termsAccepted: [false, Validators.requiredTrue],
   });
 
@@ -67,6 +75,22 @@ export class Checkout {
   protected readonly needsAddress = computed(
     () => this.selectedMethod() !== undefined && this.selectedMethod()?.kind !== 'pickup',
   );
+  protected readonly offersCashPayment = computed(() => this.selectedMethod()?.kind === 'pickup');
+  protected readonly paysCash = computed(
+    () => this.offersCashPayment() && this.formValue().payment === 'cash',
+  );
+  protected readonly paymentOptions: PaymentOption[] = [
+    {
+      value: 'online',
+      label: 'Online bezahlen',
+      description: 'Mit TWINT, Karte, Apple Pay oder Google Pay über Stripe.',
+    },
+    {
+      value: 'cash',
+      label: 'Barzahlung bei Abholung',
+      description: 'Du bezahlst bei der Abholung in Villmergen, bar oder direkt vor Ort.',
+    },
+  ];
   protected readonly shippingRappen = computed(() => {
     const method = this.selectedMethod();
     return method ? shippingPriceRappen(method.shipping_rates, this.cart.subtotalRappen()) : 0;
@@ -139,6 +163,7 @@ export class Checkout {
         },
         note: value.note,
         termsAccepted: value.termsAccepted,
+        payment: this.paysCash() ? 'cash' : 'online',
         returnBaseUrl: new URL('.', this.document.baseURI).href,
       });
       this.document.location.assign(url);

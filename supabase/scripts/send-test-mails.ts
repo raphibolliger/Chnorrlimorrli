@@ -34,6 +34,7 @@ const postalOrder: OrderMail = {
   customerNote: 'Testbestellung aus dem Mail-Test',
   paymentMethod: 'twint',
   refunded: false,
+  paymentDue: false,
   items: [
     {
       name: 'Chnorrlimorrli 2 – und die Könige des Freiamts',

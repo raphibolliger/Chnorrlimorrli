@@ -71,14 +71,14 @@ isOneToOne: false
                   ]
                 },"orders": {
                   Row: {
-                    "access_token": string,"cancelled_at": string | null,"city": string | null,"country": string,"created_at": string,"customer_note": string | null,"email": string,"first_name": string,"fulfillment_status": Database["public"]['Enums']["fulfillment_status"],"id": string,"last_name": string,"order_number": number,"paid_at": string | null,"payment_method": string | null,"payment_status": Database["public"]['Enums']["payment_status"],"phone": string | null,"postal_code": string | null,"refunded_at": string | null,"shipping_kind": Database["public"]['Enums']["shipping_kind"],"shipping_method_id": string | null,"shipping_name": string,"shipping_rappen": number,"street": string | null,"stripe_checkout_session_id": string | null,"stripe_payment_intent_id": string | null,"subtotal_rappen": number,"terms_accepted_at": string,"total_rappen": number,"tracking_number": string | null,"updated_at": string
+                    "access_token": string,"cancelled_at": string | null,"city": string | null,"confirmed_at": string | null,"country": string,"created_at": string,"customer_note": string | null,"email": string,"first_name": string,"fulfillment_status": Database["public"]['Enums']["fulfillment_status"],"id": string,"last_name": string,"order_number": number,"paid_at": string | null,"payment_method": string | null,"payment_status": Database["public"]['Enums']["payment_status"],"phone": string | null,"postal_code": string | null,"refunded_at": string | null,"shipping_kind": Database["public"]['Enums']["shipping_kind"],"shipping_method_id": string | null,"shipping_name": string,"shipping_rappen": number,"street": string | null,"stripe_checkout_session_id": string | null,"stripe_payment_intent_id": string | null,"subtotal_rappen": number,"terms_accepted_at": string,"total_rappen": number,"tracking_number": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "access_token"?: string,"cancelled_at"?: string | null,"city"?: string | null,"country"?: string,"created_at"?: string,"customer_note"?: string | null,"email": string,"first_name": string,"fulfillment_status"?: Database["public"]['Enums']["fulfillment_status"],"id"?: string,"last_name": string,"order_number"?: number,"paid_at"?: string | null,"payment_method"?: string | null,"payment_status"?: Database["public"]['Enums']["payment_status"],"phone"?: string | null,"postal_code"?: string | null,"refunded_at"?: string | null,"shipping_kind": Database["public"]['Enums']["shipping_kind"],"shipping_method_id"?: string | null,"shipping_name": string,"shipping_rappen": number,"street"?: string | null,"stripe_checkout_session_id"?: string | null,"stripe_payment_intent_id"?: string | null,"subtotal_rappen": number,"terms_accepted_at": string,"total_rappen": number,"tracking_number"?: string | null,"updated_at"?: string
+                    "access_token"?: string,"cancelled_at"?: string | null,"city"?: string | null,"confirmed_at"?: string | null,"country"?: string,"created_at"?: string,"customer_note"?: string | null,"email": string,"first_name": string,"fulfillment_status"?: Database["public"]['Enums']["fulfillment_status"],"id"?: string,"last_name": string,"order_number"?: number,"paid_at"?: string | null,"payment_method"?: string | null,"payment_status"?: Database["public"]['Enums']["payment_status"],"phone"?: string | null,"postal_code"?: string | null,"refunded_at"?: string | null,"shipping_kind": Database["public"]['Enums']["shipping_kind"],"shipping_method_id"?: string | null,"shipping_name": string,"shipping_rappen": number,"street"?: string | null,"stripe_checkout_session_id"?: string | null,"stripe_payment_intent_id"?: string | null,"subtotal_rappen": number,"terms_accepted_at": string,"total_rappen": number,"tracking_number"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "access_token"?: string,"cancelled_at"?: string | null,"city"?: string | null,"country"?: string,"created_at"?: string,"customer_note"?: string | null,"email"?: string,"first_name"?: string,"fulfillment_status"?: Database["public"]['Enums']["fulfillment_status"],"id"?: string,"last_name"?: string,"order_number"?: number,"paid_at"?: string | null,"payment_method"?: string | null,"payment_status"?: Database["public"]['Enums']["payment_status"],"phone"?: string | null,"postal_code"?: string | null,"refunded_at"?: string | null,"shipping_kind"?: Database["public"]['Enums']["shipping_kind"],"shipping_method_id"?: string | null,"shipping_name"?: string,"shipping_rappen"?: number,"street"?: string | null,"stripe_checkout_session_id"?: string | null,"stripe_payment_intent_id"?: string | null,"subtotal_rappen"?: number,"terms_accepted_at"?: string,"total_rappen"?: number,"tracking_number"?: string | null,"updated_at"?: string
+                    "access_token"?: string,"cancelled_at"?: string | null,"city"?: string | null,"confirmed_at"?: string | null,"country"?: string,"created_at"?: string,"customer_note"?: string | null,"email"?: string,"first_name"?: string,"fulfillment_status"?: Database["public"]['Enums']["fulfillment_status"],"id"?: string,"last_name"?: string,"order_number"?: number,"paid_at"?: string | null,"payment_method"?: string | null,"payment_status"?: Database["public"]['Enums']["payment_status"],"phone"?: string | null,"postal_code"?: string | null,"refunded_at"?: string | null,"shipping_kind"?: Database["public"]['Enums']["shipping_kind"],"shipping_method_id"?: string | null,"shipping_name"?: string,"shipping_rappen"?: number,"street"?: string | null,"stripe_checkout_session_id"?: string | null,"stripe_payment_intent_id"?: string | null,"subtotal_rappen"?: number,"terms_accepted_at"?: string,"total_rappen"?: number,"tracking_number"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -191,6 +191,7 @@ isOneToOne: false
               "access_token": string,
 "cancelled_at": string | null,
 "city": string | null,
+"confirmed_at": string | null,
 "country": string,
 "created_at": string,
 "customer_note": string | null,
@@ -225,11 +226,12 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
-"create_pending_order":
+"create_order":
 { Args: { "p_items": Json,"p_order": Json }; Returns: {
               "access_token": string,
 "cancelled_at": string | null,
 "city": string | null,
+"confirmed_at": string | null,
 "country": string,
 "created_at": string,
 "customer_note": string | null,
@@ -275,6 +277,7 @@ isOneToOne: false
               "access_token": string,
 "cancelled_at": string | null,
 "city": string | null,
+"confirmed_at": string | null,
 "country": string,
 "created_at": string,
 "customer_note": string | null,
@@ -314,6 +317,7 @@ isOneToOne: false
               "access_token": string,
 "cancelled_at": string | null,
 "city": string | null,
+"confirmed_at": string | null,
 "country": string,
 "created_at": string,
 "customer_note": string | null,
@@ -353,6 +357,7 @@ isOneToOne: false
               "access_token": string,
 "cancelled_at": string | null,
 "city": string | null,
+"confirmed_at": string | null,
 "country": string,
 "created_at": string,
 "customer_note": string | null,
@@ -398,6 +403,7 @@ isOneToOne: false
               "access_token": string,
 "cancelled_at": string | null,
 "city": string | null,
+"confirmed_at": string | null,
 "country": string,
 "created_at": string,
 "customer_note": string | null,
@@ -434,7 +440,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "fulfillment_status": "new"|"processing"|"ready_for_pickup"|"shipped"|"delivered"|"cancelled","payment_status": "pending"|"paid"|"failed"|"expired"|"refunded","shipping_kind": "pickup"|"postal"|"local_delivery"
+            "fulfillment_status": "new"|"processing"|"ready_for_pickup"|"shipped"|"delivered"|"cancelled","payment_status": "pending"|"paid"|"failed"|"expired"|"refunded"|"due","shipping_kind": "pickup"|"postal"|"local_delivery"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -554,7 +560,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "fulfillment_status": ["new", "processing", "ready_for_pickup", "shipped", "delivered", "cancelled"],"payment_status": ["pending", "paid", "failed", "expired", "refunded"],"shipping_kind": ["pickup", "postal", "local_delivery"]
+            "fulfillment_status": ["new", "processing", "ready_for_pickup", "shipped", "delivered", "cancelled"],"payment_status": ["pending", "paid", "failed", "expired", "refunded", "due"],"shipping_kind": ["pickup", "postal", "local_delivery"]
           }
         }
 } as const

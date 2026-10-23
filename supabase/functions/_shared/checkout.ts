@@ -55,6 +55,7 @@ export type ValidatedOrder = {
   shipping_rappen: number;
   total_rappen: number;
   customer_note: string;
+  payment_method: 'cash' | null;
 };
 
 export type UntrustedCheckoutRequest = Partial<Omit<CheckoutRequest, 'customer'>> & {
@@ -158,6 +159,14 @@ export function validateCheckout(
     }
   }
 
+  const paysCash = request.payment === 'cash';
+  if (request.payment !== undefined && request.payment !== 'online' && !paysCash) {
+    errors.push('Bitte wähle, wie du bezahlen möchtest.');
+  }
+  if (paysCash && method && method.kind !== 'pickup') {
+    errors.push('Barzahlung ist nur bei Selbstabholung möglich.');
+  }
+
   if (errors.length > 0 || !method) {
     return { ok: false, errors: [...new Set(errors)] };
   }
@@ -183,6 +192,7 @@ export function validateCheckout(
       shipping_rappen: shipping,
       total_rappen: subtotal + shipping,
       customer_note: text(request.note, 1000),
+      payment_method: paysCash ? 'cash' : null,
     },
   };
 }
