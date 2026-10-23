@@ -87,8 +87,8 @@ export class Checkout {
     },
     {
       value: 'cash',
-      label: 'Barzahlung bei Abholung',
-      description: 'Du bezahlst bei der Abholung in Villmergen, bar oder direkt vor Ort.',
+      label: 'Bezahlung bei Abholung',
+      description: 'Du bezahlst bei der Abholung in Villmergen, bar oder mit TWINT direkt vor Ort.',
     },
   ];
   protected readonly shippingRappen = computed(() => {

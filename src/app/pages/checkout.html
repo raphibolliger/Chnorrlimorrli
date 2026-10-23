@@ -325,7 +325,8 @@
           </button>
           <p class="text-center text-xs text-ink/60">
             @if (paysCash()) {
-              Du bezahlst {{ totalRappen() | chf }} bei der Abholung, bar oder direkt vor Ort.
+              Du bezahlst {{ totalRappen() | chf }} bei der Abholung, bar oder mit TWINT direkt vor
+              Ort.
             } @else {
               Du bezahlst sicher bei Stripe mit TWINT, Karte, Apple Pay oder Google Pay.
             }

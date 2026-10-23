@@ -121,7 +121,8 @@ Deno.serve(async (request) => {
     return json(
       request,
       {
-        error: 'Nur bezahlte Bestellungen oder Barzahlungen bei Abholung können bearbeitet werden.',
+        error:
+          'Nur bezahlte Bestellungen oder Bestellungen mit Bezahlung bei Abholung können bearbeitet werden.',
       },
       409,
     );

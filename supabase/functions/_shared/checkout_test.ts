@@ -186,7 +186,9 @@ Deno.test('allows cash payment only together with pickup', () => {
 
   const postalCash = validateCheckout(request({ payment: 'cash' }), [book], methods);
   assert(!postalCash.ok);
-  assertEquals(postalCash.errors, ['Barzahlung ist nur bei Selbstabholung möglich.']);
+  assertEquals(postalCash.errors, [
+    'Bezahlen bei der Abholung ist nur bei Selbstabholung möglich.',
+  ]);
 
   const online = validateCheckout(request({ payment: 'online' }), [book], methods);
   assert(online.ok);

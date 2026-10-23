@@ -212,7 +212,7 @@ function orderLink(order: OrderMail): Block {
 function paymentAtPickup(order: OrderMail): Block {
   return paragraph(
     bold('Bezahlung:'),
-    ` bei der Abholung, ${formatChf(order.totalRappen)}, zum Beispiel bar.`,
+    ` bei der Abholung, ${formatChf(order.totalRappen)}, bar oder mit TWINT direkt vor Ort.`,
   );
 }
 

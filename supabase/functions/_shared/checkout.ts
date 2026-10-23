@@ -164,7 +164,7 @@ export function validateCheckout(
     errors.push('Bitte wähle, wie du bezahlen möchtest.');
   }
   if (paysCash && method && method.kind !== 'pickup') {
-    errors.push('Barzahlung ist nur bei Selbstabholung möglich.');
+    errors.push('Bezahlen bei der Abholung ist nur bei Selbstabholung möglich.');
   }
 
   if (errors.length > 0 || !method) {

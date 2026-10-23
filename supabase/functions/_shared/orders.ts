@@ -123,7 +123,7 @@ const paymentMethodLabels: Record<string, string> = {
   apple_pay: 'Apple Pay',
   google_pay: 'Google Pay',
   link: 'Link',
-  cash: 'Bar',
+  cash: 'Bar oder TWINT vor Ort',
 };
 
 export function paymentMethodLabel(method: string | null): string | null {

@@ -173,13 +173,16 @@ Deno.test('cash orders ask for payment at pickup instead of confirming a payment
   assertStringIncludes(confirmation.text, 'wir haben deine Bestellung 1001 erhalten.');
   assertStringIncludes(
     confirmation.text,
-    'Bezahlung: bei der Abholung, CHF 50.00, zum Beispiel bar.',
+    'Bezahlung: bei der Abholung, CHF 50.00, bar oder mit TWINT direkt vor Ort.',
   );
   assert(!confirmation.text.includes('Stripe'));
   assertStringIncludes(
     adminNewOrder(cashOrder, 'x').text,
     'Bezahlung bei der Abholung: CHF 50.00, noch offen.',
   );
-  assertStringIncludes(orderReadyForPickup(cashOrder, 'x').text, 'CHF 50.00, zum Beispiel bar');
+  assertStringIncludes(
+    orderReadyForPickup(cashOrder, 'x').text,
+    'CHF 50.00, bar oder mit TWINT direkt vor Ort',
+  );
   assert(!orderReadyForPickup(order, 'x').text.includes('Bezahlung:'));
 });
