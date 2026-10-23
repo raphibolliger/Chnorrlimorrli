@@ -114,7 +114,7 @@
           <dd class="tabular-nums">{{ order.total_rappen | chf }}</dd>
         </div>
         <div class="flex justify-between">
-          <dt class="text-gray-500">Bezahlt mit</dt>
+          <dt class="text-gray-500">Zahlart</dt>
           <dd>{{ paymentMethodLabel(order.payment_method) ?? '–' }}</dd>
         </div>
       </dl>
@@ -135,7 +135,7 @@
             <span class="min-w-0">
               {{ eventLabel(event.kind) }}
               @if (event.detail) {
-                <span class="text-gray-500">· {{ event.detail }}</span>
+                <span class="text-gray-500">· {{ eventDetail(event.kind, event.detail) }}</span>
               }
             </span>
           </li>

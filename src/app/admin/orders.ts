@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, resource, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { acceptsFulfillment } from '../../../supabase/functions/_shared/orders';
 import { ChfPipe } from '../core/chf.pipe';
 import { AdminApi, OrderListEntry, OrderView } from './admin-api';
 import { fulfillmentChip, paymentChips } from './order-chips';
@@ -48,7 +49,7 @@ export class AdminOrders {
   });
 
   protected showFulfillment(order: OrderListEntry): boolean {
-    return order.payment_status === 'paid' || order.fulfillment_status === 'cancelled';
+    return acceptsFulfillment(order) || order.fulfillment_status === 'cancelled';
   }
 
   protected open(order: OrderListEntry): void {

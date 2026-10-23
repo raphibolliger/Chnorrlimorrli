@@ -32,6 +32,7 @@ export interface OrderMail {
   customerNote: string | null;
   paymentMethod: string | null;
   refunded: boolean;
+  paymentDue: boolean;
   items: OrderMailItem[];
   pickupLocation: string | null;
   pickupHours: string | null;
@@ -208,21 +209,48 @@ function orderLink(order: OrderMail): Block {
   );
 }
 
-export function orderConfirmation(order: OrderMail, siteUrl: string): MailContent {
+function paymentAtPickup(order: OrderMail): Block {
+  return paragraph(
+    bold('Bezahlung:'),
+    ` bei der Abholung, ${formatChf(order.totalRappen)}, bar oder mit TWINT direkt vor Ort.`,
+  );
+}
+
+function receivedPayment(order: OrderMail): Block[] {
   const paymentMethod = paymentMethodLabel(order.paymentMethod);
+  return [
+    paragraph(
+      `Hoi ${order.firstName}, wir haben deine Bestellung `,
+      bold(order.orderNumber),
+      ` und deine Zahlung${paymentMethod ? ` mit ${paymentMethod}` : ''} erhalten.`,
+    ),
+    'items',
+    delivery(order),
+    ...customerNote('Deine Bemerkung:', order),
+    paragraph('Die Zahlungsquittung erhältst du separat von unserem Zahlungsanbieter Stripe.'),
+  ];
+}
+
+function receivedCashOrder(order: OrderMail): Block[] {
+  return [
+    paragraph(
+      `Hoi ${order.firstName}, wir haben deine Bestellung `,
+      bold(order.orderNumber),
+      ' erhalten.',
+    ),
+    'items',
+    delivery(order),
+    paymentAtPickup(order),
+    ...customerNote('Deine Bemerkung:', order),
+  ];
+}
+
+export function orderConfirmation(order: OrderMail, siteUrl: string): MailContent {
   return render(siteUrl, order, {
     subject: `Deine Bestellung ${order.orderNumber} bei Chnorrlimorrli`,
     headline: 'Merci vilmol für deine Bestellung!',
     blocks: [
-      paragraph(
-        `Hoi ${order.firstName}, wir haben deine Bestellung `,
-        bold(order.orderNumber),
-        ` und deine Zahlung${paymentMethod ? ` mit ${paymentMethod}` : ''} erhalten.`,
-      ),
-      'items',
-      delivery(order),
-      ...customerNote('Deine Bemerkung:', order),
-      paragraph('Die Zahlungsquittung erhältst du separat von unserem Zahlungsanbieter Stripe.'),
+      ...(order.paymentDue ? receivedCashOrder(order) : receivedPayment(order)),
       orderLink(order),
       regards,
     ],
@@ -243,7 +271,11 @@ export function adminNewOrder(order: OrderMail, siteUrl: string): MailContent {
       'items',
       delivery(order),
       ...customerNote('Bemerkung:', order),
-      paragraph(`Bezahlt mit ${paymentMethodLabel(order.paymentMethod) ?? 'Stripe'}.`),
+      paragraph(
+        order.paymentDue
+          ? `Bezahlung bei der Abholung: ${formatChf(order.totalRappen)}, noch offen.`
+          : `Bezahlt mit ${paymentMethodLabel(order.paymentMethod) ?? 'Stripe'}.`,
+      ),
       paragraph(link('Bestellung in der Verwaltung öffnen', `${siteUrl}/admin/bestellungen`)),
     ],
   });
@@ -298,6 +330,7 @@ export function orderReadyForPickup(order: OrderMail, siteUrl: string): MailCont
       paragraph(
         `Abholort: ${pickupPlace(order.pickupLocation, order.pickupHours)}. Antworte einfach auf diese E-Mail, um einen Termin abzumachen.`,
       ),
+      ...(order.paymentDue ? [paymentAtPickup(order)] : []),
     ],
   });
 }

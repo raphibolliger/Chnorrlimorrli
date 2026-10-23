@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import {
+  acceptsFulfillment,
   fulfillmentFlow,
   fulfillmentStepLabel,
   OrderAction,
@@ -78,7 +79,7 @@ export class AdminOrderDetail {
 
   protected readonly actions = computed(() => {
     const order = this.order.value();
-    if (!order || order.payment_status !== 'paid' || order.fulfillment_status === 'cancelled') {
+    if (!order || !acceptsFulfillment(order) || order.fulfillment_status === 'cancelled') {
       return [];
     }
     return fulfillmentFlow[order.shipping_kind]
@@ -98,6 +99,10 @@ export class AdminOrderDetail {
 
   protected eventLabel(kind: string): string {
     return eventLabels[kind] ?? kind;
+  }
+
+  protected eventDetail(kind: string, detail: string): string {
+    return kind === 'paid' || kind === 'created' ? (paymentMethodLabel(detail) ?? detail) : detail;
   }
 
   protected startAction(action: OrderAction): void {

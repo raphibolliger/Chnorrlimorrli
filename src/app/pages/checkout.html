@@ -141,6 +141,36 @@
             }
           </fieldset>
 
+          @if (offersCashPayment()) {
+            <fieldset class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
+              <legend class="sr-only">Bezahlung</legend>
+              <h2 class="text-xl font-semibold text-navy">Bezahlung</h2>
+              <div class="mt-4 space-y-3">
+                @for (option of paymentOptions; track option.value) {
+                  <label
+                    class="flex items-start gap-3 rounded-2xl p-4 ring-1 transition"
+                    [class]="
+                      form.controls.payment.value === option.value
+                        ? 'bg-mais-50 ring-2 ring-navy'
+                        : 'bg-cream ring-ink/10 hover:ring-navy/40'
+                    "
+                  >
+                    <input
+                      type="radio"
+                      formControlName="payment"
+                      [value]="option.value"
+                      class="mt-1 accent-navy"
+                    />
+                    <span class="min-w-0 flex-1">
+                      <span class="block font-semibold">{{ option.label }}</span>
+                      <span class="mt-1 block text-sm text-ink/70">{{ option.description }}</span>
+                    </span>
+                  </label>
+                }
+              </div>
+            </fieldset>
+          }
+
           @if (needsAddress()) {
             <fieldset class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:p-6">
               <legend class="sr-only">Lieferadresse</legend>
@@ -285,10 +315,21 @@
             [disabled]="submitting()"
             class="w-full rounded-full bg-navy px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-navy/20 transition hover:bg-navy-800 disabled:opacity-60"
           >
-            {{ submitting() ? 'Einen Moment …' : 'Weiter zur Zahlung' }}
+            {{
+              submitting()
+                ? 'Einen Moment …'
+                : paysCash()
+                  ? 'Bestellung abschicken'
+                  : 'Weiter zur Zahlung'
+            }}
           </button>
           <p class="text-center text-xs text-ink/60">
-            Du bezahlst sicher bei Stripe mit TWINT, Karte, Apple Pay oder Google Pay.
+            @if (paysCash()) {
+              Du bezahlst {{ totalRappen() | chf }} bei der Abholung, bar oder mit TWINT direkt vor
+              Ort.
+            } @else {
+              Du bezahlst sicher bei Stripe mit TWINT, Karte, Apple Pay oder Google Pay.
+            }
           </p>
         </aside>
       </form>

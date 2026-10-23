@@ -170,3 +170,27 @@ Deno.test('requires a Swiss address for postal shipping', () => {
   assert(result.errors.includes('Bitte gib Strasse und Hausnummer an.'));
   assert(result.errors.includes('Bitte gib eine gültige Schweizer Postleitzahl an.'));
 });
+
+Deno.test('allows cash payment only together with pickup', () => {
+  const pickupCash = validateCheckout(
+    request({
+      shippingMethodId: 'pickup',
+      payment: 'cash',
+      customer: { email: 'a@b.ch', firstName: 'A', lastName: 'B' },
+    }),
+    [book],
+    methods,
+  );
+  assert(pickupCash.ok);
+  assertEquals(pickupCash.order.payment_method, 'cash');
+
+  const postalCash = validateCheckout(request({ payment: 'cash' }), [book], methods);
+  assert(!postalCash.ok);
+  assertEquals(postalCash.errors, [
+    'Bezahlen bei der Abholung ist nur bei Selbstabholung möglich.',
+  ]);
+
+  const online = validateCheckout(request({ payment: 'online' }), [book], methods);
+  assert(online.ok);
+  assertEquals(online.order.payment_method, null);
+});

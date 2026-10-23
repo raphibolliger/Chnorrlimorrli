@@ -3,6 +3,7 @@ import { AdminClient, adminClient, stripeClient } from '../_shared/clients.ts';
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { sendCustomerMail } from '../_shared/order-mails.ts';
 import {
+  acceptsFulfillment,
   FulfillmentAction,
   fulfillmentMailKinds,
   OrderUpdateRequest,
@@ -13,7 +14,11 @@ import {
 
 type OrderState = Pick<
   TableRow<'orders'>,
-  'id' | 'payment_status' | 'paid_at' | 'stripe_payment_intent_id' | 'stripe_checkout_session_id'
+  | 'id'
+  | 'payment_status'
+  | 'confirmed_at'
+  | 'stripe_payment_intent_id'
+  | 'stripe_checkout_session_id'
 >;
 
 function isFulfillmentAction(action: unknown): action is FulfillmentAction {
@@ -104,14 +109,23 @@ Deno.serve(async (request) => {
   const supabase = adminClient();
   const { data: order } = await supabase
     .from('orders')
-    .select('id, payment_status, paid_at, stripe_payment_intent_id, stripe_checkout_session_id')
+    .select(
+      'id, payment_status, confirmed_at, stripe_payment_intent_id, stripe_checkout_session_id',
+    )
     .eq('id', body.orderId)
     .maybeSingle();
   if (!order) {
     return json(request, { error: 'Bestellung nicht gefunden.' }, 404);
   }
-  if (action !== 'cancel' && order.payment_status !== 'paid') {
-    return json(request, { error: 'Nur bezahlte Bestellungen können bearbeitet werden.' }, 409);
+  if (action !== 'cancel' && !acceptsFulfillment(order)) {
+    return json(
+      request,
+      {
+        error:
+          'Nur bezahlte Bestellungen oder Bestellungen mit Bezahlung bei Abholung können bearbeitet werden.',
+      },
+      409,
+    );
   }
 
   const notify = body.sendMail !== false;

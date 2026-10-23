@@ -50,9 +50,23 @@ export class OrderStatus {
     const order = this.order();
     return order ? statusHeadline(order) : '';
   });
-  protected readonly paymentMethod = computed(() =>
-    paymentMethodLabel(this.order()?.payment_method ?? null),
-  );
+  protected readonly awaitsOnlinePayment = computed(() => {
+    const order = this.order();
+    return order?.fulfillment_status !== 'cancelled' && order?.payment_status === 'pending';
+  });
+  protected readonly missedOnlinePayment = computed(() => {
+    const order = this.order();
+    return (
+      order?.fulfillment_status !== 'cancelled' &&
+      (order?.payment_status === 'failed' || order?.payment_status === 'expired')
+    );
+  });
+  protected readonly paidWith = computed(() => {
+    const order = this.order();
+    return order?.payment_status === 'paid' || order?.payment_status === 'refunded'
+      ? paymentMethodLabel(order.payment_method)
+      : null;
+  });
   protected readonly pickupPlace = computed(() => {
     const method = this.order()?.shipping_methods;
     return pickupPlace(method?.pickup_location ?? null, method?.pickup_hours ?? null);
@@ -84,7 +98,7 @@ export class OrderStatus {
       }
       this.order.set(order);
       this.state.set('ready');
-      if (order.payment_status === 'paid' && this.justOrdered()) {
+      if (order.confirmed_at !== null && this.justOrdered()) {
         this.cart.clear();
       } else if (order.payment_status === 'pending' && this.paymentChecks++ < maxPaymentChecks) {
         this.timer = setTimeout(() => this.load(), 2000);

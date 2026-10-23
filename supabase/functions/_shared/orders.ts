@@ -8,6 +8,7 @@ export type ShippingKind = Enums['shipping_kind'];
 export type PaymentStatus = Enums['payment_status'];
 export type FulfillmentStatus = Enums['fulfillment_status'];
 export type ProductOptions = Record<string, string>;
+export type CheckoutPayment = 'online' | 'cash';
 
 export interface CheckoutRequest {
   items: { productId: string; quantity: number; options: ProductOptions }[];
@@ -23,6 +24,7 @@ export interface CheckoutRequest {
   };
   note: string;
   termsAccepted: boolean;
+  payment: CheckoutPayment;
   returnBaseUrl: string;
 }
 
@@ -41,6 +43,7 @@ export type OrderSummary = Pick<
   | 'total_rappen'
   | 'payment_method'
   | 'tracking_number'
+  | 'confirmed_at'
 > & {
   order_items: (Pick<TableRow<'order_items'>, 'product_name' | 'quantity' | 'line_total_rappen'> & {
     options: ProductOptions;
@@ -49,7 +52,7 @@ export type OrderSummary = Pick<
 };
 
 export const orderSummaryColumns =
-  'order_number, created_at, payment_status, fulfillment_status, first_name, email, shipping_kind, shipping_name, subtotal_rappen, shipping_rappen, total_rappen, payment_method, tracking_number, order_items(product_name, options, quantity, line_total_rappen), shipping_methods(pickup_location, pickup_hours)';
+  'order_number, created_at, confirmed_at, payment_status, fulfillment_status, first_name, email, shipping_kind, shipping_name, subtotal_rappen, shipping_rappen, total_rappen, payment_method, tracking_number, order_items(product_name, options, quantity, line_total_rappen), shipping_methods(pickup_location, pickup_hours)';
 
 export function orderPagePath(accessToken: string): string {
   return `bestellung?code=${accessToken}`;
@@ -80,9 +83,13 @@ export const fulfillmentMailKinds: Record<
 
 export function sendsCustomerMail(
   action: OrderAction,
-  order: Pick<TableRow<'orders'>, 'paid_at'>,
+  order: Pick<TableRow<'orders'>, 'confirmed_at'>,
 ): boolean {
-  return action === 'cancel' ? order.paid_at !== null : fulfillmentMailKinds[action] !== null;
+  return action === 'cancel' ? order.confirmed_at !== null : fulfillmentMailKinds[action] !== null;
+}
+
+export function acceptsFulfillment(order: Pick<TableRow<'orders'>, 'payment_status'>): boolean {
+  return order.payment_status === 'paid' || order.payment_status === 'due';
 }
 
 export function fulfillmentStepLabel(status: FulfillmentAction, kind: ShippingKind): string {
@@ -116,6 +123,7 @@ const paymentMethodLabels: Record<string, string> = {
   apple_pay: 'Apple Pay',
   google_pay: 'Google Pay',
   link: 'Link',
+  cash: 'Bar oder TWINT vor Ort',
 };
 
 export function paymentMethodLabel(method: string | null): string | null {
